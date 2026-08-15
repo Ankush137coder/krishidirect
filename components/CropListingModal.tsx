@@ -18,16 +18,17 @@ import {
     Calendar,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation, type TranslationKey } from "@/lib/i18n";
 import type { Category, CropListing, Unit } from "@/types/marketplace";
 import FarmerVoiceWidget from "./FarmerVoiceWidget";
 
-const CATEGORY_META: { id: Category; label: string; icon: typeof Carrot }[] = [
-    { id: "tomato", label: "Tomato", icon: CircleDot },
-    { id: "potato", label: "Potato", icon: SproutIcon },
-    { id: "onion", label: "Onion", icon: Carrot },
-    { id: "leafy-greens", label: "Leafy Greens", icon: Leaf },
-    { id: "fruits", label: "Fruits", icon: Apple },
-    { id: "grains", label: "Grains", icon: Wheat },
+const CATEGORY_META: { id: Category; labelKey: TranslationKey; icon: typeof Carrot }[] = [
+    { id: "tomato", labelKey: "category.tomato", icon: CircleDot },
+    { id: "potato", labelKey: "category.potato", icon: SproutIcon },
+    { id: "onion", labelKey: "category.onion", icon: Carrot },
+    { id: "leafy-greens", labelKey: "category.leafy-greens", icon: Leaf },
+    { id: "fruits", labelKey: "category.fruits", icon: Apple },
+    { id: "grains", labelKey: "category.grains", icon: Wheat },
 ];
 
 interface CropListingModalProps {
@@ -37,6 +38,7 @@ interface CropListingModalProps {
 }
 
 export default function CropListingModal({ open, onClose, onSubmit }: CropListingModalProps) {
+    const { t } = useTranslation();
     const [step, setStep] = useState(1);
     const [category, setCategory] = useState<Category | null>(null);
     const [quantity, setQuantity] = useState(5);
@@ -98,9 +100,11 @@ export default function CropListingModal({ open, onClose, onSubmit }: CropListin
                             <div className="mb-5 flex items-center justify-between">
                                 <div>
                                     <p className="font-serif text-xl font-semibold text-[#1B4332]">
-                                        Post New Harvest
+                                        {t("modal.title")}
                                     </p>
-                                    <p className="text-sm text-[#8A8370]">Step {step} of {totalSteps}</p>
+                                    <p className="text-sm text-[#8A8370]">
+                                        {t("modal.stepOf", { step, total: totalSteps })}
+                                    </p>
                                 </div>
                                 <button
                                     onClick={handleClose}
@@ -129,15 +133,17 @@ export default function CropListingModal({ open, onClose, onSubmit }: CropListin
                                 onClick={() => setVoiceOpen(true)}
                                 className="mb-6 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[#C4622D] bg-[#FCEFE3] py-3 text-sm font-semibold text-[#C4622D] transition-colors hover:bg-[#F9E2CC]"
                             >
-                                <Mic className="h-4 w-4" /> Speak your listing instead
+                                <Mic className="h-4 w-4" /> {t("modal.speakInstead")}
                             </button>
 
                             {/* STEP 1 — category */}
                             {step === 1 && (
                                 <div>
-                                    <p className="mb-3 text-sm font-medium text-[#3D4A42]">What did you harvest?</p>
+                                    <p className="mb-3 text-sm font-medium text-[#3D4A42]">
+                                        {t("modal.whatDidYouHarvest")}
+                                    </p>
                                     <div className="grid grid-cols-3 gap-3">
-                                        {CATEGORY_META.map(({ id, label, icon: Icon }) => (
+                                        {CATEGORY_META.map(({ id, labelKey, icon: Icon }) => (
                                             <button
                                                 key={id}
                                                 onClick={() => setCategory(id)}
@@ -150,12 +156,14 @@ export default function CropListingModal({ open, onClose, onSubmit }: CropListin
                                                 )}
                                             >
                                                 <Icon className="h-7 w-7" strokeWidth={1.75} />
-                                                <span className="text-xs font-medium">{label}</span>
+                                                <span className="text-xs font-medium">{t(labelKey)}</span>
                                             </button>
                                         ))}
                                     </div>
 
-                                    <p className="mb-3 mt-6 text-sm font-medium text-[#3D4A42]">Add a photo</p>
+                                    <p className="mb-3 mt-6 text-sm font-medium text-[#3D4A42]">
+                                        {t("modal.addPhoto")}
+                                    </p>
                                     <button
                                         onClick={() => setPhotoAttached((v) => !v)}
                                         className={cn(
@@ -167,7 +175,7 @@ export default function CropListingModal({ open, onClose, onSubmit }: CropListin
                                     >
                                         <Camera className="h-7 w-7" strokeWidth={1.5} />
                                         <span className="text-sm font-medium">
-                                            {photoAttached ? "Photo attached ✓" : "Tap to take a photo"}
+                                            {photoAttached ? t("modal.photoAttached") : t("modal.tapToPhoto")}
                                         </span>
                                     </button>
                                 </div>
@@ -178,7 +186,7 @@ export default function CropListingModal({ open, onClose, onSubmit }: CropListin
                                 <div className="space-y-6">
                                     <div>
                                         <div className="mb-2 flex items-center justify-between">
-                                            <p className="text-sm font-medium text-[#3D4A42]">Quantity</p>
+                                            <p className="text-sm font-medium text-[#3D4A42]">{t("modal.quantity")}</p>
                                             <div className="flex overflow-hidden rounded-full border border-[#E4DCC8] text-xs font-semibold">
                                                 {(["kg", "quintal"] as Unit[]).map((u) => (
                                                     <button
@@ -217,7 +225,7 @@ export default function CropListingModal({ open, onClose, onSubmit }: CropListin
 
                                     <div>
                                         <p className="mb-2 text-sm font-medium text-[#3D4A42]">
-                                            Expected price per {unit}
+                                            {t("modal.pricePerUnit", { unit })}
                                         </p>
                                         <div className="flex items-center justify-between rounded-2xl border border-[#E4DCC8] bg-white p-3">
                                             <button
@@ -245,7 +253,7 @@ export default function CropListingModal({ open, onClose, onSubmit }: CropListin
                             {/* STEP 3 — preview */}
                             {step === 3 && (
                                 <div>
-                                    <p className="mb-3 text-sm font-medium text-[#3D4A42]">Listing preview</p>
+                                    <p className="mb-3 text-sm font-medium text-[#3D4A42]">{t("modal.preview")}</p>
                                     <div className="rounded-2xl border border-[#E4DCC8] bg-white p-4">
                                         <div className="mb-3 flex items-center gap-3">
                                             <div className="grid h-12 w-12 place-items-center rounded-xl bg-[#EAF1EC] text-[#1B4332]">
@@ -257,7 +265,7 @@ export default function CropListingModal({ open, onClose, onSubmit }: CropListin
                                             </div>
                                             <div>
                                                 <p className="font-semibold capitalize text-[#1B4332]">
-                                                    {category?.replace("-", " ") ?? "—"}
+                                                    {category ? t(CATEGORY_META.find((c) => c.id === category)!.labelKey) : "—"}
                                                 </p>
                                                 <p className="text-sm text-[#8A8370]">
                                                     {quantity} {unit} · ₹{price}/{unit}
@@ -266,11 +274,12 @@ export default function CropListingModal({ open, onClose, onSubmit }: CropListin
                                         </div>
                                         <div className="flex items-center gap-1.5 rounded-lg bg-[#EAF1EC] px-3 py-2 text-xs font-medium text-[#1B4332]">
                                             <Calendar className="h-3.5 w-3.5" />
-                                            Nearby buyers within ~12 km will see this instantly
+                                            {t("modal.nearbyBuyers")}
                                         </div>
                                     </div>
                                     <p className="mt-4 text-center text-sm text-[#8A8370]">
-                                        Total value ≈ <span className="font-semibold text-[#C4622D]">
+                                        {t("modal.totalValue")}{" "}
+                                        <span className="font-semibold text-[#C4622D]">
                                             ₹{(quantity * price).toLocaleString("en-IN")}
                                         </span>
                                     </p>
@@ -284,7 +293,7 @@ export default function CropListingModal({ open, onClose, onSubmit }: CropListin
                                         onClick={() => setStep((s) => s - 1)}
                                         className="flex-1 rounded-2xl border border-[#E4DCC8] py-3.5 text-sm font-semibold text-[#3D4A42]"
                                     >
-                                        Back
+                                        {t("modal.back")}
                                     </button>
                                 )}
                                 {step < totalSteps ? (
@@ -293,14 +302,14 @@ export default function CropListingModal({ open, onClose, onSubmit }: CropListin
                                         disabled={step === 1 && !step1Valid}
                                         className="flex-1 rounded-2xl bg-[#1B4332] py-3.5 text-sm font-semibold text-[#FBF7EF] disabled:cursor-not-allowed disabled:opacity-40"
                                     >
-                                        Continue
+                                        {t("modal.continue")}
                                     </button>
                                 ) : (
                                     <button
                                         onClick={handleSubmit}
                                         className="flex-1 rounded-2xl bg-[#E8A33D] py-3.5 text-sm font-semibold text-[#1B4332] transition-transform active:scale-[0.98]"
                                     >
-                                        Publish Listing
+                                        {t("modal.publish")}
                                     </button>
                                 )}
                             </div>
@@ -311,7 +320,6 @@ export default function CropListingModal({ open, onClose, onSubmit }: CropListin
 
             <FarmerVoiceWidget
                 open={voiceOpen}
-                language="en"
                 onClose={() => setVoiceOpen(false)}
                 onTranscript={() => setStep(2)}
             />

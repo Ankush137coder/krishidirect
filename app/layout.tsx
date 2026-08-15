@@ -1,6 +1,7 @@
 // app/layout.tsx
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter } from "next/font/google";
+import Providers from "./providers";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -37,7 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         off-canvas modals) regardless of which component introduces it.
       */}
       <body className="w-full max-w-full overflow-x-hidden bg-[#FBF7EF] font-sans antialiased">
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

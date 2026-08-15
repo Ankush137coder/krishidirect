@@ -5,13 +5,12 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sprout, Globe, ChevronDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 import type { Language, UserRole } from "@/types/marketplace";
 
 interface NavbarProps {
     role: UserRole;
     onRoleChange: (role: UserRole) => void;
-    language: Language;
-    onLanguageChange: (lang: Language) => void;
 }
 
 const LANGUAGES: Record<Language, string> = {
@@ -20,13 +19,9 @@ const LANGUAGES: Record<Language, string> = {
     mr: "मराठी",
 };
 
-export default function Navbar({
-    role,
-    onRoleChange,
-    language,
-    onLanguageChange,
-}: NavbarProps) {
+export default function Navbar({ role, onRoleChange }: NavbarProps) {
     const [langOpen, setLangOpen] = useState(false);
+    const { language, setLanguage, t } = useTranslation();
 
     return (
         <header className="sticky top-0 z-40 w-full max-w-full border-b border-[#E4DCC8] bg-[#FBF7EF]/90 backdrop-blur-md">
@@ -66,7 +61,7 @@ export default function Navbar({
                                         transition={{ type: "spring", stiffness: 400, damping: 30 }}
                                     />
                                 )}
-                                {r === "farmer" ? "Farmer" : "Vendor"}
+                                {r === "farmer" ? t("nav.farmer") : t("nav.vendor")}
                             </button>
                         ))}
                     </div>
@@ -107,7 +102,7 @@ export default function Navbar({
                                                 role="option"
                                                 aria-selected={language === code}
                                                 onClick={() => {
-                                                    onLanguageChange(code);
+                                                    setLanguage(code);
                                                     setLangOpen(false);
                                                 }}
                                                 className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm text-[#3D4A42] hover:bg-[#FBF7EF]"

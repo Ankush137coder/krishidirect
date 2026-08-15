@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, X, Volume2, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Language } from "@/types/marketplace";
+import { useTranslation, SPEECH_LANG_CODE } from "@/lib/i18n";
 
 // Minimal ambient typing so this compiles without adding @types/dom-speech-recognition.
 interface SpeechRecognitionResultLike {
@@ -22,21 +22,8 @@ interface SpeechRecognitionLike extends EventTarget {
     onerror: (() => void) | null;
 }
 
-const LANG_CODE: Record<Language, string> = {
-    en: "en-IN",
-    hi: "hi-IN",
-    mr: "mr-IN",
-};
-
-const PROMPTS: Record<Language, string> = {
-    en: "Tap and say your crop, quantity, and price",
-    hi: "टैप करें और अपनी फसल, मात्रा और कीमत बोलें",
-    mr: "टॅप करा आणि तुमचे पीक, प्रमाण आणि किंमत सांगा",
-};
-
 interface FarmerVoiceWidgetProps {
     open: boolean;
-    language: Language;
     onClose: () => void;
     /** Called with the raw transcript once the farmer finishes speaking — parent decides how to parse it. */
     onTranscript: (text: string) => void;
@@ -44,10 +31,10 @@ interface FarmerVoiceWidgetProps {
 
 export default function FarmerVoiceWidget({
     open,
-    language,
     onClose,
     onTranscript,
 }: FarmerVoiceWidgetProps) {
+    const { language, t } = useTranslation();
     const [listening, setListening] = useState(false);
     const [transcript, setTranscript] = useState("");
     const [supported, setSupported] = useState(true);
@@ -62,7 +49,7 @@ export default function FarmerVoiceWidget({
             return;
         }
         const recognition: SpeechRecognitionLike = new SpeechRecognitionCtor();
-        recognition.lang = LANG_CODE[language];
+        recognition.lang = SPEECH_LANG_CODE[language];
         recognition.continuous = false;
         recognition.interimResults = true;
         recognition.onresult = (event) => {
@@ -120,7 +107,7 @@ export default function FarmerVoiceWidget({
                         <div className="mb-5 flex items-center justify-between">
                             <div className="flex items-center gap-2 text-[#1B4332]">
                                 <Volume2 className="h-5 w-5" />
-                                <span className="font-serif text-lg font-semibold">Voice Listing</span>
+                                <span className="font-serif text-lg font-semibold">{t("voice.title")}</span>
                             </div>
                             <button
                                 onClick={onClose}
@@ -133,13 +120,12 @@ export default function FarmerVoiceWidget({
 
                         {!supported ? (
                             <p className="rounded-xl bg-[#FBEAEA] p-4 text-sm text-[#8C2F2F]">
-                                Voice input isn&apos;t supported on this browser. Please try typing your crop
-                                details instead.
+                                {t("voice.notSupported")}
                             </p>
                         ) : (
                             <>
                                 <p className="mb-6 text-center text-base font-medium text-[#3D4A42]">
-                                    {PROMPTS[language]}
+                                    {t("voice.prompt")}
                                 </p>
 
                                 <div className="relative mx-auto mb-6 grid h-36 w-36 place-items-center">
@@ -166,7 +152,7 @@ export default function FarmerVoiceWidget({
                                 <div className="mb-6 min-h-[3.5rem] rounded-2xl border border-dashed border-[#E4DCC8] bg-white px-4 py-3 text-center text-[#3D4A42]">
                                     {transcript || (
                                         <span className="inline-flex items-center gap-1.5 text-[#9A9483]">
-                                            <Sparkles className="h-4 w-4" /> Your words appear here
+                                            <Sparkles className="h-4 w-4" /> {t("voice.placeholder")}
                                         </span>
                                     )}
                                 </div>
@@ -176,7 +162,7 @@ export default function FarmerVoiceWidget({
                                     disabled={!transcript.trim()}
                                     className="w-full rounded-2xl bg-[#E8A33D] py-3.5 text-base font-semibold text-[#1B4332] transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
                                 >
-                                    Use this listing
+                                    {t("voice.useThis")}
                                 </button>
                             </>
                         )}

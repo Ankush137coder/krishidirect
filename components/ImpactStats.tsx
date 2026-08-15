@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Leaf, TrendingUp, Handshake } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 import type { ImpactMetrics } from "@/types/marketplace";
 
 /** Counts a number up from 0 on mount — the one animated flourish this bar gets. */
@@ -29,30 +30,31 @@ interface ImpactStatsProps {
 }
 
 export default function ImpactStats({ metrics }: ImpactStatsProps) {
+    const { t } = useTranslation();
     const savedKg = useCountUp(metrics.totalProduceSavedKg);
     const deals = useCountUp(metrics.activeVendorDeals);
 
     const cards = [
         {
             icon: Leaf,
-            label: "Produce Saved from Waste",
+            label: t("impact.savedLabel"),
             value: `${savedKg.toLocaleString("en-IN")} kg`,
             accent: "bg-[#2D6A4F]",
-            sub: `+${metrics.weeklyTrendPercent}% vs last week`,
+            sub: t("impact.savedSub", { percent: metrics.weeklyTrendPercent }),
         },
         {
             icon: TrendingUp,
-            label: "Direct Farmer Earnings Boost",
+            label: t("impact.earningsLabel"),
             value: `+${metrics.farmerEarningsBoostPercent}%`,
             accent: "bg-[#C4622D]",
-            sub: "vs. mandi middleman price",
+            sub: t("impact.earningsSub"),
         },
         {
             icon: Handshake,
-            label: "Active Local Vendor Deals",
+            label: t("impact.dealsLabel"),
             value: deals.toLocaleString("en-IN"),
             accent: "bg-[#E8A33D]",
-            sub: "closing within 15 km radius",
+            sub: t("impact.dealsSub"),
         },
     ];
 

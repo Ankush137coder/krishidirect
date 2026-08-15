@@ -7,7 +7,8 @@ import Navbar from "@/components/navbar";
 import ImpactStats from "@/components/ImpactStats";
 import VendorMarketplaceFeed from "@/components/VendorMarketplaceFeed";
 import CropListingModal from "@/components/CropListingModal";
-import type { CropListing, ImpactMetrics, Language, UserRole } from "@/types/marketplace";
+import { useTranslation } from "@/lib/i18n";
+import type { CropListing, ImpactMetrics, UserRole } from "@/types/marketplace";
 
 // --- Demo seed data -------------------------------------------------------
 // In production this would come from an API route / Supabase query keyed on
@@ -142,8 +143,8 @@ const MOCK_LISTINGS: CropListing[] = [
 ];
 
 export default function DashboardPage() {
+  const { t } = useTranslation();
   const [role, setRole] = useState<UserRole>("farmer");
-  const [language, setLanguage] = useState<Language>("en");
   const [listings, setListings] = useState<CropListing[]>(MOCK_LISTINGS);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -172,12 +173,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#FBF7EF]">
-      <Navbar
-        role={role}
-        onRoleChange={setRole}
-        language={language}
-        onLanguageChange={setLanguage}
-      />
+      <Navbar role={role} onRoleChange={setRole} />
 
       <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
         <div className="mb-6 w-full">
@@ -187,24 +183,23 @@ export default function DashboardPage() {
         {role === "vendor" ? (
           <>
             <h1 className="mb-4 font-serif text-2xl font-semibold text-[#1B4332]">
-              Fresh near you
+              {t("dashboard.freshNearYou")}
             </h1>
             <VendorMarketplaceFeed listings={listings} />
           </>
         ) : (
           <div className="w-full rounded-3xl border border-dashed border-[#E4DCC8] bg-white p-6 text-center sm:p-10">
             <h1 className="mb-2 font-serif text-2xl font-semibold text-[#1B4332]">
-              Your harvest, straight to buyers
+              {t("dashboard.heroTitle")}
             </h1>
             <p className="mx-auto mb-6 max-w-sm text-sm text-[#8A8370]">
-              List what you&apos;ve harvested in under a minute. Nearby vendors see it instantly —
-              no middleman, no waiting.
+              {t("dashboard.heroDescription")}
             </p>
             <button
               onClick={() => setModalOpen(true)}
               className="inline-flex items-center gap-2 rounded-2xl bg-[#1B4332] px-6 py-3.5 text-sm font-semibold text-[#FBF7EF] shadow-lg transition-transform active:scale-[0.98]"
             >
-              <Plus className="h-4 w-4" /> Post New Harvest
+              <Plus className="h-4 w-4" /> {t("dashboard.postNewHarvest")}
             </button>
           </div>
         )}
