@@ -29,7 +29,7 @@ export default function Navbar({
     const [langOpen, setLangOpen] = useState(false);
 
     return (
-        <header className="sticky top-0 z-40 w-full max-w-full overflow-x-hidden border-b border-[#E4DCC8] bg-[#FBF7EF]/90 backdrop-blur-md">
+        <header className="sticky top-0 z-40 w-full max-w-full border-b border-[#E4DCC8] bg-[#FBF7EF]/90 backdrop-blur-md">
             <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-1.5 px-3 py-3 sm:gap-3 sm:px-6">
                 {/* Wordmark */}
                 <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
@@ -99,7 +99,7 @@ export default function Navbar({
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: -6, scale: 0.97 }}
                                     transition={{ duration: 0.15 }}
-                                    className="absolute right-0 mt-2 w-36 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl border border-[#E4DCC8] bg-white p-1 shadow-lg"
+                                    className="absolute right-0 z-50 mt-2 w-36 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl border border-[#E4DCC8] bg-white p-1 shadow-lg"
                                 >
                                     {(Object.keys(LANGUAGES) as Language[]).map((code) => (
                                         <li key={code}>
