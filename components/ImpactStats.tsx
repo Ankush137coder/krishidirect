@@ -1,0 +1,82 @@
+// components/ImpactStats.tsx
+"use client";
+
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { Leaf, TrendingUp, Handshake } from "lucide-react";
+import type { ImpactMetrics } from "@/types/marketplace";
+
+/** Counts a number up from 0 on mount — the one animated flourish this bar gets. */
+function useCountUp(target: number, durationMs = 1200) {
+    const [value, setValue] = useState(0);
+    useEffect(() => {
+        let raf: number;
+        const start = performance.now();
+        const tick = (now: number) => {
+            const progress = Math.min(1, (now - start) / durationMs);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            setValue(Math.round(target * eased));
+            if (progress < 1) raf = requestAnimationFrame(tick);
+        };
+        raf = requestAnimationFrame(tick);
+        return () => cancelAnimationFrame(raf);
+    }, [target, durationMs]);
+    return value;
+}
+
+interface ImpactStatsProps {
+    metrics: ImpactMetrics;
+}
+
+export default function ImpactStats({ metrics }: ImpactStatsProps) {
+    const savedKg = useCountUp(metrics.totalProduceSavedKg);
+    const deals = useCountUp(metrics.activeVendorDeals);
+
+    const cards = [
+        {
+            icon: Leaf,
+            label: "Produce Saved from Waste",
+            value: `${savedKg.toLocaleString("en-IN")} kg`,
+            accent: "bg-[#2D6A4F]",
+            sub: `+${metrics.weeklyTrendPercent}% vs last week`,
+        },
+        {
+            icon: TrendingUp,
+            label: "Direct Farmer Earnings Boost",
+            value: `+${metrics.farmerEarningsBoostPercent}%`,
+            accent: "bg-[#C4622D]",
+            sub: "vs. mandi middleman price",
+        },
+        {
+            icon: Handshake,
+            label: "Active Local Vendor Deals",
+            value: deals.toLocaleString("en-IN"),
+            accent: "bg-[#E8A33D]",
+            sub: "closing within 15 km radius",
+        },
+    ];
+
+    return (
+        <section aria-label="Community impact" className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {cards.map((card, i) => (
+                <motion.div
+                    key={card.label}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.08 }}
+                    className="relative overflow-hidden rounded-2xl bg-[#1B4332] p-4 text-[#FBF7EF]"
+                >
+                    <div className={`absolute -right-4 -top-4 h-16 w-16 rounded-full ${card.accent} opacity-20`} />
+                    <div className="mb-2 flex items-center gap-2">
+                        <div className={`grid h-8 w-8 place-items-center rounded-full ${card.accent}`}>
+                            <card.icon className="h-4 w-4 text-[#1B4332]" strokeWidth={2.25} />
+                        </div>
+                        <p className="text-xs font-medium text-[#CFE0D3]">{card.label}</p>
+                    </div>
+                    <p className="font-serif text-2xl font-semibold tracking-tight">{card.value}</p>
+                    <p className="mt-0.5 text-[11px] text-[#9FBBA6]">{card.sub}</p>
+                </motion.div>
+            ))}
+        </section>
+    );
+}
