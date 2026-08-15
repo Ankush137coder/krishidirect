@@ -29,8 +29,8 @@ export default function Navbar({
     const [langOpen, setLangOpen] = useState(false);
 
     return (
-        <header className="sticky top-0 z-40 border-b border-[#E4DCC8] bg-[#FBF7EF]/90 backdrop-blur-md">
-            <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
+        <header className="sticky top-0 z-40 w-full max-w-full overflow-x-hidden border-b border-[#E4DCC8] bg-[#FBF7EF]/90 backdrop-blur-md">
+            <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
                 {/* Wordmark */}
                 <div className="flex items-center gap-2">
                     <div className="grid h-9 w-9 place-items-center rounded-full bg-[#1B4332]">

@@ -171,7 +171,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FBF7EF]">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#FBF7EF]">
       <Navbar
         role={role}
         onRoleChange={setRole}
@@ -179,8 +179,8 @@ export default function DashboardPage() {
         onLanguageChange={setLanguage}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
-        <div className="mb-6">
+      <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
+        <div className="mb-6 w-full">
           <ImpactStats metrics={MOCK_METRICS} />
         </div>
 
@@ -192,7 +192,7 @@ export default function DashboardPage() {
             <VendorMarketplaceFeed listings={listings} />
           </>
         ) : (
-          <div className="rounded-3xl border border-dashed border-[#E4DCC8] bg-white p-10 text-center">
+          <div className="w-full rounded-3xl border border-dashed border-[#E4DCC8] bg-white p-6 text-center sm:p-10">
             <h1 className="mb-2 font-serif text-2xl font-semibold text-[#1B4332]">
               Your harvest, straight to buyers
             </h1>

@@ -57,14 +57,21 @@ export default function ImpactStats({ metrics }: ImpactStatsProps) {
     ];
 
     return (
-        <section aria-label="Community impact" className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        // min-w-0 on the grid itself, plus on every card below, stops long unbroken
+        // strings (e.g. "1,420 kg") from forcing the grid track — and therefore the
+        // whole page — wider than the viewport. Grid/flex children default to
+        // min-width: auto, which is the classic cause of silent horizontal overflow.
+        <section
+            aria-label="Community impact"
+            className="grid w-full min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
+        >
             {cards.map((card, i) => (
                 <motion.div
                     key={card.label}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.08 }}
-                    className="relative overflow-hidden rounded-2xl bg-[#1B4332] p-4 text-[#FBF7EF]"
+                    className="relative w-full min-w-0 overflow-hidden rounded-2xl bg-[#1B4332] p-4 text-[#FBF7EF]"
                 >
                     <div className={`absolute -right-4 -top-4 h-16 w-16 rounded-full ${card.accent} opacity-20`} />
                     <div className="mb-2 flex items-center gap-2">

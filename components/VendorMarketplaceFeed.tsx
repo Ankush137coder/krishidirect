@@ -185,14 +185,14 @@ export default function VendorMarketplaceFeed({ listings }: VendorMarketplaceFee
                     No listings match these filters yet. Try widening the distance radius.
                 </div>
             ) : (
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid w-full min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {filtered.map((listing, i) => (
                         <motion.article
                             key={listing.id}
                             initial={{ opacity: 0, y: 12 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: i * 0.04 }}
-                            className="overflow-hidden rounded-2xl border border-[#E4DCC8] bg-white shadow-sm"
+                            className="w-full min-w-0 overflow-hidden rounded-2xl border border-[#E4DCC8] bg-white shadow-sm"
                         >
                             <div className="relative flex h-32 items-center justify-center bg-[#EAF1EC]">
                                 <span className="font-serif text-4xl capitalize text-[#1B4332]/30">
