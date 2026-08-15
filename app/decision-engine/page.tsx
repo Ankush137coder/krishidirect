@@ -4,7 +4,7 @@
 
 import Link from "next/link";
 import { ArrowLeft, Sprout } from "lucide-react";
-import Navbar from "@/components/Navbar";
+import navbar from "@/components/Navbar";
 import DecisionEngine from "@/components/DecisionEngine";
 import type { UserRole } from "@/types/marketplace";
 
