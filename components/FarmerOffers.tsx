@@ -1,10 +1,8 @@
 // components/FarmerOffers.tsx
-
 "use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-
 import {
     Check,
     X,
@@ -22,15 +20,10 @@ import {
 import {
     getOffers,
     updateOffer,
-    cancelOffer,
+    deleteOffer,
     type MarketplaceOffer,
     type DealStage,
 } from "@/lib/marketplaceOffers";
-
-
-/* =========================================================
-   DEAL STAGES
-========================================================= */
 
 const DEAL_STAGES: {
     id: DealStage;
@@ -40,47 +33,30 @@ const DEAL_STAGES: {
     {
         id: "offer-received",
         label: "Offer Received",
-        description:
-            "Vendor has submitted an offer.",
+        description: "Vendor has submitted an offer.",
     },
     {
         id: "offer-accepted",
         label: "Offer Accepted",
-        description:
-            "Farmer accepted the vendor's offer.",
+        description: "Farmer accepted the vendor's offer.",
     },
     {
         id: "pickup-arranged",
         label: "Pickup Arranged",
-        description:
-            "Pickup has been arranged.",
+        description: "Pickup has been arranged.",
     },
     {
         id: "completed",
         label: "Completed",
-        description:
-            "Transaction completed successfully.",
+        description: "Transaction completed successfully.",
     },
 ];
 
-
-/* =========================================================
-   GET CURRENT DEAL STAGE INDEX
-========================================================= */
-
-function getStageIndex(
-    stage: DealStage
-) {
+function getStageIndex(stage: DealStage) {
     return DEAL_STAGES.findIndex(
-        (item) =>
-            item.id === stage
+        (item) => item.id === stage
     );
 }
-
-
-/* =========================================================
-   STATUS BADGE
-========================================================= */
 
 function StatusBadge({
     status,
@@ -91,7 +67,7 @@ function StatusBadge({
         return (
             <span className="inline-flex items-center gap-1 rounded-full bg-[#FFF4D6] px-3 py-1 text-xs font-semibold text-[#9A6B00]">
                 <Clock className="h-3.5 w-3.5" />
-                Pending
+                🟡 Pending
             </span>
         );
     }
@@ -100,37 +76,50 @@ function StatusBadge({
         return (
             <span className="inline-flex items-center gap-1 rounded-full bg-[#EAF1EC] px-3 py-1 text-xs font-semibold text-[#1B4332]">
                 <Check className="h-3.5 w-3.5" />
-                Accepted
+                🟢 Accepted
+            </span>
+        );
+    }
+
+    if (status === "rejected") {
+        return (
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#FCEFE3] px-3 py-1 text-xs font-semibold text-[#B44822]">
+                <X className="h-3.5 w-3.5" />
+                🔴 Rejected
             </span>
         );
     }
 
     return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-[#FCEFE3] px-3 py-1 text-xs font-semibold text-[#B44822]">
-            <X className="h-3.5 w-3.5" />
-            Rejected
+        <span className="inline-flex items-center gap-1 rounded-full bg-[#F1EDE5] px-3 py-1 text-xs font-semibold text-[#6F685B]">
+            <Ban className="h-3.5 w-3.5" />
+            Cancelled
         </span>
     );
 }
-
-
-/* =========================================================
-   DEAL PROGRESS
-========================================================= */
 
 function DealProgress({
     offer,
 }: {
     offer: MarketplaceOffer;
 }) {
-    const currentIndex =
-        getStageIndex(
-            offer.dealStage
-        );
+    const currentIndex = getStageIndex(
+        offer.dealStage
+    );
+
+    const advanceDeal = () => {
+        const nextStage = currentIndex + 1;
+
+        if (nextStage < DEAL_STAGES.length) {
+            updateOffer(offer.id, {
+                dealStage:
+                    DEAL_STAGES[nextStage].id,
+            });
+        }
+    };
 
     return (
         <div className="mt-6 rounded-2xl bg-[#FBF7EF] p-5">
-
             <div className="mb-5">
                 <p className="text-xs font-semibold uppercase tracking-wider text-[#8A8370]">
                     Deal Status
@@ -141,33 +130,21 @@ function DealProgress({
                 </h3>
             </div>
 
-
             <div className="space-y-4">
-
                 {DEAL_STAGES.map(
-                    (
-                        stage,
-                        index
-                    ) => {
-
+                    (stage, index) => {
                         const completed =
-                            index <=
-                            currentIndex;
+                            index <= currentIndex;
 
                         const isCurrent =
-                            index ===
-                            currentIndex;
+                            index === currentIndex;
 
                         return (
                             <div
-                                key={
-                                    stage.id
-                                }
+                                key={stage.id}
                                 className="flex items-start gap-3"
                             >
-
                                 <div className="flex flex-col items-center">
-
                                     <div
                                         className={`grid h-9 w-9 place-items-center rounded-full ${
                                             completed
@@ -175,29 +152,22 @@ function DealProgress({
                                                 : "bg-[#E4DCC8] text-[#8A8370]"
                                         }`}
                                     >
-
-                                        {index ===
-                                            0 && (
+                                        {index === 0 && (
                                             <Clock className="h-4 w-4" />
                                         )}
 
-                                        {index ===
-                                            1 && (
+                                        {index === 1 && (
                                             <Check className="h-4 w-4" />
                                         )}
 
-                                        {index ===
-                                            2 && (
+                                        {index === 2 && (
                                             <Truck className="h-4 w-4" />
                                         )}
 
-                                        {index ===
-                                            3 && (
+                                        {index === 3 && (
                                             <CircleCheck className="h-4 w-4" />
                                         )}
-
                                     </div>
-
 
                                     {index <
                                         DEAL_STAGES.length -
@@ -211,12 +181,9 @@ function DealProgress({
                                             }`}
                                         />
                                     )}
-
                                 </div>
 
-
                                 <div className="pt-1">
-
                                     <p
                                         className={`text-sm font-semibold ${
                                             completed
@@ -224,123 +191,69 @@ function DealProgress({
                                                 : "text-[#8A8370]"
                                         }`}
                                     >
-
-                                        {
-                                            stage.label
-                                        }
+                                        {stage.label}
 
                                         {isCurrent && (
                                             <span className="ml-2 rounded-full bg-[#E8A33D] px-2 py-0.5 text-[10px] font-semibold text-[#1B4332]">
                                                 Current
                                             </span>
                                         )}
-
                                     </p>
-
 
                                     <p className="mt-0.5 text-xs text-[#8A8370]">
-                                        {
-                                            stage.description
-                                        }
+                                        {stage.description}
                                     </p>
-
                                 </div>
-
                             </div>
                         );
                     }
                 )}
-
             </div>
 
+            {offer.status === "accepted" &&
+                offer.dealStage !== "completed" && (
+                    <button
+                        onClick={advanceDeal}
+                        className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#1B4332] py-3 text-sm font-semibold text-white transition-transform active:scale-[0.98]"
+                    >
+                        {offer.dealStage ===
+                            "offer-accepted" && (
+                            <>
+                                <Truck className="h-4 w-4" />
+                                Arrange Pickup
+                            </>
+                        )}
 
-            {/* ADVANCE DEAL */}
-
-            {offer.status ===
-                "accepted" &&
-                offer.dealStage !==
-                    "completed" && (
-
-                <button
-                    onClick={() => {
-
-                        const nextStage =
-                            currentIndex +
-                            1;
-
-                        if (
-                            nextStage <
-                            DEAL_STAGES.length
-                        ) {
-                            updateOffer(
-                                offer.id,
-                                {
-                                    dealStage:
-                                        DEAL_STAGES[
-                                            nextStage
-                                        ].id,
-                                }
-                            );
-                        }
-
-                    }}
-                    className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#1B4332] py-3 text-sm font-semibold text-white transition hover:bg-[#143728]"
-                >
-
-                    {offer.dealStage ===
-                        "offer-accepted" && (
-                        <>
-                            <Truck className="h-4 w-4" />
-                            Arrange Pickup
-                        </>
-                    )}
-
-
-                    {offer.dealStage ===
-                        "pickup-arranged" && (
-                        <>
-                            <PackageCheck className="h-4 w-4" />
-                            Mark as Completed
-                        </>
-                    )}
-
-                </button>
-            )}
-
+                        {offer.dealStage ===
+                            "pickup-arranged" && (
+                            <>
+                                <PackageCheck className="h-4 w-4" />
+                                Mark as Completed
+                            </>
+                        )}
+                    </button>
+                )}
         </div>
     );
 }
 
-
-/* =========================================================
-   FARMER OFFERS PAGE
-========================================================= */
-
 export default function FarmerOffers() {
-
     const [offers, setOffers] =
-        useState<
-            MarketplaceOffer[]
-        >([]);
+        useState<MarketplaceOffer[]>([]);
 
-
-    /* Load offers */
+    const [cancelConfirm, setCancelConfirm] =
+        useState<string | null>(null);
 
     const loadOffers = () => {
-        setOffers(
-            getOffers()
-        );
+        setOffers(getOffers());
     };
 
-
-    /* Listen for offer updates */
-
     useEffect(() => {
-
         loadOffers();
 
-        const handler = () =>
+        const handler = () => {
             loadOffers();
+        };
 
         window.addEventListener(
             "krishidirect-offers-updated",
@@ -348,129 +261,72 @@ export default function FarmerOffers() {
         );
 
         return () => {
-
             window.removeEventListener(
                 "krishidirect-offers-updated",
                 handler
             );
-
         };
-
     }, []);
-
-
-    /* =====================================================
-       ACCEPT
-    ===================================================== */
 
     const handleAccept = (
         offer: MarketplaceOffer
     ) => {
-
-        updateOffer(
-            offer.id,
-            {
-                status:
-                    "accepted",
-
-                dealStage:
-                    "offer-accepted",
-            }
-        );
+        updateOffer(offer.id, {
+            status: "accepted",
+            dealStage: "offer-accepted",
+        });
 
         loadOffers();
     };
-
-
-    /* =====================================================
-       REJECT
-    ===================================================== */
 
     const handleReject = (
         offer: MarketplaceOffer
     ) => {
-
-        updateOffer(
-            offer.id,
-            {
-                status:
-                    "rejected",
-            }
-        );
+        updateOffer(offer.id, {
+            status: "rejected",
+        });
 
         loadOffers();
     };
-
-
-    /* =====================================================
-       CANCEL
-    ===================================================== */
 
     const handleCancel = (
         offer: MarketplaceOffer
     ) => {
-
-        const confirmed =
-            window.confirm(
-                "Are you sure you want to cancel this offer?"
-            );
-
-        if (!confirmed) {
-            return;
-        }
-
-        cancelOffer(
-            offer.id
-        );
-
+        deleteOffer(offer.id);
+        setCancelConfirm(null);
         loadOffers();
     };
 
-
     return (
-
         <main className="min-h-screen bg-[#FBF7EF] px-4 py-6 sm:px-6">
-
             <div className="mx-auto max-w-5xl">
 
-
-                {/* =================================================
-                    BACK TO DASHBOARD
-                ================================================= */}
-
-                <div className="mb-4">
+                {/* TOP NAVIGATION */}
+                <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <Link
+                        href="/dashboard"
+                        className="inline-flex w-fit items-center gap-2 rounded-xl border border-[#E4DCC8] bg-white px-4 py-2.5 text-sm font-semibold text-[#1B4332] shadow-sm transition-colors hover:border-[#1B4332] hover:bg-[#EAF1EC]"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                        Back to Dashboard
+                    </Link>
 
                     <Link
                         href="/dashboard"
-                        className="inline-flex items-center gap-2 rounded-xl border border-[#E4DCC8] bg-white px-4 py-2.5 text-sm font-semibold text-[#1B4332] shadow-sm transition hover:bg-[#EAF1EC]"
+                        className="text-sm font-medium text-[#8A8370] hover:text-[#1B4332]"
                     >
-
-                        <ArrowLeft className="h-4 w-4" />
-
-                        Back to Dashboard
-
+                        Main Marketplace
                     </Link>
-
                 </div>
 
-
-                {/* =================================================
-                    HEADER
-                ================================================= */}
-
+                {/* HEADER */}
                 <section className="mb-6 rounded-3xl bg-[#1B4332] p-6 text-[#FBF7EF] shadow-lg sm:p-8">
-
                     <div className="flex items-center gap-4">
-
                         <div className="grid h-12 w-12 place-items-center rounded-2xl bg-[#E8A33D] text-[#1B4332]">
-
                             <PackageCheck className="h-6 w-6" />
-
                         </div>
 
-
                         <div>
-
                             <p className="text-xs uppercase tracking-wider text-[#B9C9BB]">
                                 KrishiDirect
                             </p>
@@ -482,23 +338,43 @@ export default function FarmerOffers() {
                             <p className="mt-1 text-sm text-[#D8E5DC]">
                                 Review vendor offers and manage your deals.
                             </p>
-
                         </div>
-
                     </div>
-
                 </section>
 
+                {/* STATUS EXPLANATION */}
+                <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    <div className="rounded-2xl border border-[#E4DCC8] bg-white p-4">
+                        <p className="text-sm font-semibold text-[#9A6B00]">
+                            🟡 Pending
+                        </p>
+                        <p className="mt-1 text-xs text-[#8A8370]">
+                            Waiting for your decision.
+                        </p>
+                    </div>
 
-                {/* =================================================
-                    NO OFFERS
-                ================================================= */}
+                    <div className="rounded-2xl border border-[#E4DCC8] bg-white p-4">
+                        <p className="text-sm font-semibold text-[#1B4332]">
+                            🟢 Accepted
+                        </p>
+                        <p className="mt-1 text-xs text-[#8A8370]">
+                            Deal is now in progress.
+                        </p>
+                    </div>
 
-                {offers.length ===
-                    0 && (
+                    <div className="rounded-2xl border border-[#E4DCC8] bg-white p-4">
+                        <p className="text-sm font-semibold text-[#B44822]">
+                            🔴 Rejected
+                        </p>
+                        <p className="mt-1 text-xs text-[#8A8370]">
+                            Offer was declined.
+                        </p>
+                    </div>
+                </div>
 
+                {/* NO OFFERS */}
+                {offers.length === 0 && (
                     <div className="rounded-3xl border border-dashed border-[#E4DCC8] bg-white p-12 text-center">
-
                         <Package className="mx-auto h-12 w-12 text-[#B9C9BB]" />
 
                         <h2 className="mt-4 font-serif text-2xl font-semibold text-[#1B4332]">
@@ -511,207 +387,127 @@ export default function FarmerOffers() {
 
                         <Link
                             href="/dashboard"
-                            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#1B4332] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#143728]"
+                            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#1B4332] px-5 py-3 text-sm font-semibold text-white"
                         >
                             <ArrowLeft className="h-4 w-4" />
-                            Return to Dashboard
+                            Go to Dashboard
                         </Link>
-
                     </div>
-
                 )}
 
-
-                {/* =================================================
-                    OFFERS
-                ================================================= */}
-
+                {/* OFFERS */}
                 <div className="space-y-5">
-
-                    {offers.map(
-                        (offer) => (
-
-                            <section
-                                key={
-                                    offer.id
-                                }
-                                className="rounded-3xl border border-[#E4DCC8] bg-white p-5 shadow-sm sm:p-6"
-                            >
-
-
-                                {/* OFFER HEADER */}
-
-                                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-
-                                    <div className="flex items-center gap-3">
-
-                                        <div className="grid h-12 w-12 place-items-center rounded-xl bg-[#EAF1EC] text-[#1B4332]">
-
-                                            <User className="h-6 w-6" />
-
-                                        </div>
-
-
-                                        <div>
-
-                                            <p className="font-semibold text-[#1B4332]">
-                                                {
-                                                    offer.vendorName
-                                                }
-                                            </p>
-
-                                            <p className="text-xs text-[#8A8370]">
-                                                Vendor offer
-                                            </p>
-
-                                        </div>
-
+                    {offers.map((offer) => (
+                        <section
+                            key={offer.id}
+                            className="rounded-3xl border border-[#E4DCC8] bg-white p-5 shadow-sm sm:p-6"
+                        >
+                            {/* OFFER HEADER */}
+                            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="grid h-12 w-12 place-items-center rounded-xl bg-[#EAF1EC] text-[#1B4332]">
+                                        <User className="h-6 w-6" />
                                     </div>
-
-
-                                    <StatusBadge
-                                        status={
-                                            offer.status
-                                        }
-                                    />
-
-                                </div>
-
-
-                                {/* =================================================
-                                    OFFER DETAILS
-                                ================================================= */}
-
-                                <div className="mt-5 grid gap-3 sm:grid-cols-3">
-
-                                    <div className="rounded-2xl bg-[#FBF7EF] p-4">
-
-                                        <p className="text-xs text-[#8A8370]">
-                                            Crop
-                                        </p>
-
-                                        <p className="mt-1 font-semibold capitalize text-[#1B4332]">
-                                            {
-                                                offer.crop
-                                            }
-                                        </p>
-
-                                    </div>
-
-
-                                    <div className="rounded-2xl bg-[#FBF7EF] p-4">
-
-                                        <p className="text-xs text-[#8A8370]">
-                                            Quantity
-                                        </p>
-
-                                        <p className="mt-1 font-semibold text-[#1B4332]">
-                                            {
-                                                offer.quantity
-                                            }{" "}
-                                            {
-                                                offer.unit
-                                            }
-                                        </p>
-
-                                    </div>
-
-
-                                    <div className="rounded-2xl bg-[#FCEFE3] p-4">
-
-                                        <p className="text-xs text-[#8A8370]">
-                                            Offered Price
-                                        </p>
-
-                                        <p className="mt-1 flex items-center font-semibold text-[#C4622D]">
-
-                                            <IndianRupee className="h-4 w-4" />
-
-                                            {
-                                                offer.offeredPricePerUnit
-                                            }
-
-                                            /kg
-
-                                        </p>
-
-                                    </div>
-
-                                </div>
-
-
-                                {/* =================================================
-                                    PRICE COMPARISON
-                                ================================================= */}
-
-                                <div className="mt-4 flex flex-col gap-2 rounded-2xl border border-[#E4DCC8] p-4 sm:flex-row sm:items-center sm:justify-between">
 
                                     <div>
+                                        <p className="font-semibold text-[#1B4332]">
+                                            {offer.vendorName}
+                                        </p>
 
                                         <p className="text-xs text-[#8A8370]">
-                                            Your listed price
+                                            Vendor offer
                                         </p>
-
-                                        <p className="font-semibold text-[#3D4A42]">
-                                            ₹
-                                            {
-                                                offer.originalPricePerUnit
-                                            }
-                                            /kg
-                                        </p>
-
                                     </div>
-
-
-                                    <div>
-
-                                        <p className="text-xs text-[#8A8370]">
-                                            Total offer value
-                                        </p>
-
-                                        <p className="font-serif text-xl font-semibold text-[#1B4332]">
-                                            ₹
-                                            {(
-                                                offer.quantity *
-                                                offer.offeredPricePerUnit
-                                            ).toLocaleString(
-                                                "en-IN"
-                                            )}
-                                        </p>
-
-                                    </div>
-
                                 </div>
 
+                                <StatusBadge
+                                    status={offer.status}
+                                />
+                            </div>
 
-                                {/* =================================================
-                                    ACTION BUTTONS
-                                ================================================= */}
+                            {/* OFFER DETAILS */}
+                            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                                <div className="rounded-2xl bg-[#FBF7EF] p-4">
+                                    <p className="text-xs text-[#8A8370]">
+                                        Crop
+                                    </p>
 
-                                {offer.status ===
-                                    "pending" && (
+                                    <p className="mt-1 font-semibold capitalize text-[#1B4332]">
+                                        {offer.crop}
+                                    </p>
+                                </div>
 
-                                    <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                                <div className="rounded-2xl bg-[#FBF7EF] p-4">
+                                    <p className="text-xs text-[#8A8370]">
+                                        Quantity
+                                    </p>
 
-                                        {/* ACCEPT */}
+                                    <p className="mt-1 font-semibold text-[#1B4332]">
+                                        {offer.quantity}{" "}
+                                        {offer.unit}
+                                    </p>
+                                </div>
 
+                                <div className="rounded-2xl bg-[#FCEFE3] p-4">
+                                    <p className="text-xs text-[#8A8370]">
+                                        Offered Price
+                                    </p>
+
+                                    <p className="mt-1 flex items-center font-semibold text-[#C4622D]">
+                                        <IndianRupee className="h-4 w-4" />
+                                        {offer.offeredPricePerUnit}
+                                        /kg
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* PRICE COMPARISON */}
+                            <div className="mt-4 flex flex-col gap-2 rounded-2xl border border-[#E4DCC8] p-4 sm:flex-row sm:items-center sm:justify-between">
+                                <div>
+                                    <p className="text-xs text-[#8A8370]">
+                                        Your listed price
+                                    </p>
+
+                                    <p className="font-semibold text-[#3D4A42]">
+                                        ₹
+                                        {offer.originalPricePerUnit}
+                                        /kg
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <p className="text-xs text-[#8A8370]">
+                                        Total offer value
+                                    </p>
+
+                                    <p className="font-serif text-xl font-semibold text-[#1B4332]">
+                                        ₹
+                                        {(
+                                            offer.quantity *
+                                            offer.offeredPricePerUnit
+                                        ).toLocaleString(
+                                            "en-IN"
+                                        )}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* PENDING ACTIONS */}
+                            {offer.status ===
+                                "pending" && (
+                                <>
+                                    <div className="mt-5 flex gap-3">
                                         <button
                                             onClick={() =>
                                                 handleAccept(
                                                     offer
                                                 )
                                             }
-                                            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#1B4332] py-3 text-sm font-semibold text-white transition hover:bg-[#143728]"
+                                            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#1B4332] py-3 text-sm font-semibold text-white transition-transform active:scale-[0.98]"
                                         >
-
                                             <Check className="h-4 w-4" />
-
                                             Accept
-
                                         </button>
-
-
-                                        {/* REJECT */}
 
                                         <button
                                             onClick={() =>
@@ -719,80 +515,101 @@ export default function FarmerOffers() {
                                                     offer
                                                 )
                                             }
-                                            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#FCEFE3] py-3 text-sm font-semibold text-[#C4622D] transition hover:bg-[#F8DFCE]"
+                                            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#FCEFE3] py-3 text-sm font-semibold text-[#C4622D]"
                                         >
-
                                             <X className="h-4 w-4" />
-
                                             Reject
-
                                         </button>
-
-
-                                        {/* CANCEL */}
-
-                                        <button
-                                            onClick={() =>
-                                                handleCancel(
-                                                    offer
-                                                )
-                                            }
-                                            className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#E4DCC8] bg-white py-3 text-sm font-semibold text-[#8A8370] transition hover:border-[#C4622D] hover:bg-[#FCEFE3] hover:text-[#C4622D]"
-                                        >
-
-                                            <Ban className="h-4 w-4" />
-
-                                            Cancel Offer
-
-                                        </button>
-
                                     </div>
 
-                                )}
+                                    {/* CANCEL OFFER */}
+                                    <div className="mt-3">
+                                        {cancelConfirm ===
+                                        offer.id ? (
+                                            <div className="rounded-2xl border border-[#F1C9B8] bg-[#FCEFE3] p-4">
+                                                <p className="text-sm font-semibold text-[#B44822]">
+                                                    Cancel this offer?
+                                                </p>
 
+                                                <p className="mt-1 text-xs text-[#8A8370]">
+                                                    This will permanently remove the offer from the marketplace demo.
+                                                </p>
 
-                                {/* =================================================
-                                    DEAL PROGRESS
-                                ================================================= */}
+                                                <div className="mt-3 flex gap-2">
+                                                    <button
+                                                        onClick={() =>
+                                                            handleCancel(
+                                                                offer
+                                                            )
+                                                        }
+                                                        className="flex-1 rounded-xl bg-[#B44822] py-2.5 text-xs font-semibold text-white"
+                                                    >
+                                                        Yes, Cancel Offer
+                                                    </button>
 
-                                {offer.status ===
-                                    "accepted" && (
-
-                                    <DealProgress
-                                        offer={
-                                            offer
-                                        }
-                                    />
-
-                                )}
-
-
-                                {/* =================================================
-                                    REJECTED
-                                ================================================= */}
-
-                                {offer.status ===
-                                    "rejected" && (
-
-                                    <div className="mt-5 rounded-2xl bg-[#FCEFE3] p-4 text-center">
-
-                                        <p className="text-sm font-semibold text-[#B44822]">
-                                            This offer has been rejected.
-                                        </p>
-
+                                                    <button
+                                                        onClick={() =>
+                                                            setCancelConfirm(
+                                                                null
+                                                            )
+                                                        }
+                                                        className="flex-1 rounded-xl border border-[#E4DCC8] bg-white py-2.5 text-xs font-semibold text-[#3D4A42]"
+                                                    >
+                                                        Keep Offer
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <button
+                                                onClick={() =>
+                                                    setCancelConfirm(
+                                                        offer.id
+                                                    )
+                                                }
+                                                className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#E4DCC8] py-2.5 text-xs font-semibold text-[#8A8370] transition-colors hover:border-[#C4622D] hover:text-[#C4622D]"
+                                            >
+                                                <Ban className="h-3.5 w-3.5" />
+                                                Cancel Offer
+                                            </button>
+                                        )}
                                     </div>
+                                </>
+                            )}
 
-                                )}
+                            {/* DEAL PROGRESS */}
+                            {offer.status ===
+                                "accepted" && (
+                                <DealProgress
+                                    offer={offer}
+                                />
+                            )}
 
-                            </section>
-
-                        )
-                    )}
-
+                            {/* REJECTED */}
+                            {offer.status ===
+                                "rejected" && (
+                                <div className="mt-5 rounded-2xl bg-[#FCEFE3] p-4 text-center">
+                                    <p className="text-sm font-semibold text-[#B44822]">
+                                        🔴 This offer has been rejected.
+                                    </p>
+                                </div>
+                            )}
+                        </section>
+                    ))}
                 </div>
 
+                {/* BOTTOM DASHBOARD BUTTON */}
+                {offers.length > 0 && (
+                    <div className="mt-8 pb-8 text-center">
+                        <Link
+                            href="/dashboard"
+                            className="inline-flex items-center gap-2 rounded-2xl bg-[#1B4332] px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition-transform active:scale-[0.98]"
+                        >
+                            <ArrowLeft className="h-4 w-4" />
+                            Move to Dashboard
+                        </Link>
+                    </div>
+                )}
             </div>
-
         </main>
     );
 }
