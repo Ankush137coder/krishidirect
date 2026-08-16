@@ -3,7 +3,8 @@
 export type OfferStatus =
     | "pending"
     | "accepted"
-    | "rejected";
+    | "rejected"
+    | "cancelled";
 
 export type DealStage =
     | "offer-received"
@@ -37,34 +38,43 @@ export interface MarketplaceOffer {
     createdAt: string;
 }
 
-const STORAGE_KEY = "krishidirect-marketplace-offers";
+const STORAGE_KEY =
+    "krishidirect-marketplace-offers";
 
-/**
- * Get all offers stored in the browser.
- */
+/* -------------------------------------------------- */
+/* Get all offers */
+/* -------------------------------------------------- */
+
 export function getOffers(): MarketplaceOffer[] {
     if (typeof window === "undefined") {
         return [];
     }
 
     try {
-        const stored = localStorage.getItem(STORAGE_KEY);
+        const stored =
+            localStorage.getItem(
+                STORAGE_KEY
+            );
 
         if (!stored) {
             return [];
         }
 
-        return JSON.parse(stored) as MarketplaceOffer[];
-    } catch (error) {
-        console.error("Failed to read marketplace offers:", error);
+        return JSON.parse(
+            stored
+        ) as MarketplaceOffer[];
+    } catch {
         return [];
     }
 }
 
-/**
- * Save a new offer.
- */
-export function saveOffer(offer: MarketplaceOffer): void {
+/* -------------------------------------------------- */
+/* Save new offer */
+/* -------------------------------------------------- */
+
+export function saveOffer(
+    offer: MarketplaceOffer
+) {
     if (typeof window === "undefined") {
         return;
     }
@@ -79,55 +89,104 @@ export function saveOffer(offer: MarketplaceOffer): void {
     );
 
     window.dispatchEvent(
-        new Event("krishidirect-offers-updated")
+        new Event(
+            "krishidirect-offers-updated"
+        )
     );
 }
 
-/**
- * Update an existing offer.
- */
+/* -------------------------------------------------- */
+/* Update an offer */
+/* -------------------------------------------------- */
+
 export function updateOffer(
     id: string,
     updates: Partial<MarketplaceOffer>
-): void {
+) {
     if (typeof window === "undefined") {
         return;
     }
 
     const offers = getOffers();
 
-    const updatedOffers = offers.map((offer) => {
-        if (offer.id === id) {
-            return {
-                ...offer,
-                ...updates,
-            };
-        }
-
-        return offer;
-    });
+    const updatedOffers =
+        offers.map((offer) =>
+            offer.id === id
+                ? {
+                      ...offer,
+                      ...updates,
+                  }
+                : offer
+        );
 
     localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify(updatedOffers)
+        JSON.stringify(
+            updatedOffers
+        )
     );
 
     window.dispatchEvent(
-        new Event("krishidirect-offers-updated")
+        new Event(
+            "krishidirect-offers-updated"
+        )
     );
 }
 
-/**
- * Delete all offers.
- */
-export function clearOffers(): void {
+/* -------------------------------------------------- */
+/* Cancel an offer */
+/* -------------------------------------------------- */
+
+export function cancelOffer(
+    id: string
+) {
     if (typeof window === "undefined") {
         return;
     }
 
-    localStorage.removeItem(STORAGE_KEY);
+    const offers = getOffers();
+
+    const updatedOffers =
+        offers.map((offer) =>
+            offer.id === id &&
+            offer.status === "pending"
+                ? {
+                      ...offer,
+                      status: "cancelled" as const,
+                  }
+                : offer
+        );
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(
+            updatedOffers
+        )
+    );
 
     window.dispatchEvent(
-        new Event("krishidirect-offers-updated")
+        new Event(
+            "krishidirect-offers-updated"
+        )
+    );
+}
+
+/* -------------------------------------------------- */
+/* Clear all offers - useful for demo/testing */
+/* -------------------------------------------------- */
+
+export function clearOffers() {
+    if (typeof window === "undefined") {
+        return;
+    }
+
+    localStorage.removeItem(
+        STORAGE_KEY
+    );
+
+    window.dispatchEvent(
+        new Event(
+            "krishidirect-offers-updated"
+        )
     );
 }
