@@ -1,17 +1,19 @@
 // components/FarmerOffers.tsx
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
+    ArrowLeft,
     Check,
     X,
     Clock,
     Truck,
-    Package,
     PackageCheck,
     CircleCheck,
     User,
     IndianRupee,
+    Inbox,
 } from "lucide-react";
 
 import {
@@ -20,6 +22,10 @@ import {
     type MarketplaceOffer,
     type DealStage,
 } from "@/lib/marketplaceOffers";
+
+/* -------------------------------------------------- */
+/* Deal stages */
+/* -------------------------------------------------- */
 
 const DEAL_STAGES: {
     id: DealStage;
@@ -52,6 +58,10 @@ const DEAL_STAGES: {
     },
 ];
 
+/* -------------------------------------------------- */
+/* Stage index */
+/* -------------------------------------------------- */
+
 function getStageIndex(
     stage: DealStage
 ) {
@@ -61,6 +71,10 @@ function getStageIndex(
     );
 }
 
+/* -------------------------------------------------- */
+/* Status badge */
+/* -------------------------------------------------- */
+
 function StatusBadge({
     status,
 }: {
@@ -68,8 +82,8 @@ function StatusBadge({
 }) {
     if (status === "pending") {
         return (
-            <span className="inline-flex items-center gap-1 rounded-full bg-[#FFF4D6] px-3 py-1 text-xs font-semibold text-[#9A6B00]">
-                <Clock className="h-3.5 w-3.5" />
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FFF4D6] px-3 py-1.5 text-xs font-semibold text-[#9A6B00]">
+                <span className="h-2 w-2 rounded-full bg-[#E8A33D]" />
                 Pending
             </span>
         );
@@ -77,30 +91,67 @@ function StatusBadge({
 
     if (status === "accepted") {
         return (
-            <span className="inline-flex items-center gap-1 rounded-full bg-[#EAF1EC] px-3 py-1 text-xs font-semibold text-[#1B4332]">
-                <Check className="h-3.5 w-3.5" />
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#EAF1EC] px-3 py-1.5 text-xs font-semibold text-[#1B4332]">
+                <span className="h-2 w-2 rounded-full bg-[#2D6A4F]" />
                 Accepted
             </span>
         );
     }
 
+    if (status === "rejected") {
+        return (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FCEFE3] px-3 py-1.5 text-xs font-semibold text-[#B44822]">
+                <span className="h-2 w-2 rounded-full bg-[#C4622D]" />
+                Rejected
+            </span>
+        );
+    }
+
     return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-[#FCEFE3] px-3 py-1 text-xs font-semibold text-[#B44822]">
-            <X className="h-3.5 w-3.5" />
-            Rejected
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#F1F1F1] px-3 py-1.5 text-xs font-semibold text-[#666666]">
+            <span className="h-2 w-2 rounded-full bg-[#888888]" />
+            Cancelled
         </span>
     );
 }
 
+/* -------------------------------------------------- */
+/* Deal progress */
+/* -------------------------------------------------- */
+
 function DealProgress({
     offer,
+    onUpdated,
 }: {
     offer: MarketplaceOffer;
+    onUpdated: () => void;
 }) {
     const currentIndex =
         getStageIndex(
             offer.dealStage
         );
+
+    const advanceDeal = () => {
+        const nextStage =
+            currentIndex + 1;
+
+        if (
+            nextStage <
+            DEAL_STAGES.length
+        ) {
+            updateOffer(
+                offer.id,
+                {
+                    dealStage:
+                        DEAL_STAGES[
+                            nextStage
+                        ].id,
+                }
+            );
+
+            onUpdated();
+        }
+    };
 
     return (
         <div className="mt-6 rounded-2xl bg-[#FBF7EF] p-5">
@@ -145,7 +196,7 @@ function DealProgress({
                                     >
                                         {index ===
                                             0 && (
-                                            <Clock className="h-4 w-4" />
+                                            <Inbox className="h-4 w-4" />
                                         )}
 
                                         {index ===
@@ -210,53 +261,46 @@ function DealProgress({
             </div>
 
             {/* Advance deal */}
-            {offer.status ===
-                "accepted" &&
-                offer.dealStage !==
-                    "completed" && (
-                    <button
-                        onClick={() => {
-                            const nextStage =
-                                currentIndex +
-                                1;
 
-                            if (
-                                nextStage <
-                                DEAL_STAGES.length
-                            ) {
-                                updateOffer(
-                                    offer.id,
-                                    {
-                                        dealStage:
-                                            DEAL_STAGES[
-                                                nextStage
-                                            ].id,
-                                    }
-                                );
-                            }
-                        }}
-                        className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#1B4332] py-3 text-sm font-semibold text-white"
-                    >
-                        {offer.dealStage ===
-                            "offer-accepted" && (
-                            <>
-                                <Truck className="h-4 w-4" />
-                                Arrange Pickup
-                            </>
-                        )}
+            {offer.dealStage !==
+                "completed" && (
+                <button
+                    onClick={
+                        advanceDeal
+                    }
+                    className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#1B4332] py-3 text-sm font-semibold text-white transition hover:bg-[#14372A]"
+                >
+                    {offer.dealStage ===
+                        "offer-accepted" && (
+                        <>
+                            <Truck className="h-4 w-4" />
+                            Arrange Pickup
+                        </>
+                    )}
 
-                        {offer.dealStage ===
-                            "pickup-arranged" && (
-                            <>
-                                <PackageCheck className="h-4 w-4" />
-                                Mark as Completed
-                            </>
-                        )}
-                    </button>
-                )}
+                    {offer.dealStage ===
+                        "pickup-arranged" && (
+                        <>
+                            <PackageCheck className="h-4 w-4" />
+                            Mark as Completed
+                        </>
+                    )}
+                </button>
+            )}
+
+            {offer.dealStage ===
+                "completed" && (
+                <div className="mt-5 rounded-xl bg-[#EAF1EC] p-3 text-center text-sm font-semibold text-[#1B4332]">
+                    ✓ Deal completed successfully
+                </div>
+            )}
         </div>
     );
 }
+
+/* -------------------------------------------------- */
+/* Main component */
+/* -------------------------------------------------- */
 
 export default function FarmerOffers() {
     const [offers, setOffers] =
@@ -289,6 +333,10 @@ export default function FarmerOffers() {
         };
     }, []);
 
+    /* -------------------------------------------------- */
+    /* Accept */
+    /* -------------------------------------------------- */
+
     const handleAccept = (
         offer: MarketplaceOffer
     ) => {
@@ -304,6 +352,10 @@ export default function FarmerOffers() {
         loadOffers();
     };
 
+    /* -------------------------------------------------- */
+    /* Reject */
+    /* -------------------------------------------------- */
+
     const handleReject = (
         offer: MarketplaceOffer
     ) => {
@@ -317,11 +369,47 @@ export default function FarmerOffers() {
         loadOffers();
     };
 
+    /* -------------------------------------------------- */
+    /* Counts */
+    /* -------------------------------------------------- */
+
+    const pendingCount =
+        offers.filter(
+            (o) =>
+                o.status ===
+                "pending"
+        ).length;
+
+    const acceptedCount =
+        offers.filter(
+            (o) =>
+                o.status ===
+                "accepted"
+        ).length;
+
+    const rejectedCount =
+        offers.filter(
+            (o) =>
+                o.status ===
+                "rejected"
+        ).length;
+
     return (
         <main className="min-h-screen bg-[#FBF7EF] px-4 py-6 sm:px-6">
             <div className="mx-auto max-w-5xl">
 
+                {/* BACK BUTTON */}
+
+                <Link
+                    href="/dashboard"
+                    className="mb-5 inline-flex items-center gap-2 rounded-xl border border-[#E4DCC8] bg-white px-4 py-2.5 text-sm font-semibold text-[#1B4332] shadow-sm transition hover:border-[#1B4332]"
+                >
+                    <ArrowLeft className="h-4 w-4" />
+                    Back to Dashboard
+                </Link>
+
                 {/* HEADER */}
+
                 <section className="mb-6 rounded-3xl bg-[#1B4332] p-6 text-[#FBF7EF] shadow-lg sm:p-8">
                     <div className="flex items-center gap-4">
                         <div className="grid h-12 w-12 place-items-center rounded-2xl bg-[#E8A33D] text-[#1B4332]">
@@ -344,11 +432,69 @@ export default function FarmerOffers() {
                     </div>
                 </section>
 
+                {/* STATUS LEGEND */}
+
+                <section className="mb-6 rounded-2xl border border-[#E4DCC8] bg-white p-4">
+                    <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#8A8370]">
+                        Offer Status
+                    </p>
+
+                    <div className="flex flex-wrap gap-3">
+                        <StatusBadge status="pending" />
+                        <StatusBadge status="accepted" />
+                        <StatusBadge status="rejected" />
+                        <StatusBadge status="cancelled" />
+                    </div>
+                </section>
+
+                {/* SUMMARY */}
+
+                {offers.length > 0 && (
+                    <section className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                        <div className="rounded-2xl bg-white p-4 shadow-sm">
+                            <p className="text-xs text-[#8A8370]">
+                                Total Offers
+                            </p>
+                            <p className="mt-1 font-serif text-2xl font-semibold text-[#1B4332]">
+                                {offers.length}
+                            </p>
+                        </div>
+
+                        <div className="rounded-2xl bg-[#FFF4D6] p-4">
+                            <p className="text-xs text-[#9A6B00]">
+                                Pending
+                            </p>
+                            <p className="mt-1 font-serif text-2xl font-semibold text-[#9A6B00]">
+                                {pendingCount}
+                            </p>
+                        </div>
+
+                        <div className="rounded-2xl bg-[#EAF1EC] p-4">
+                            <p className="text-xs text-[#2D6A4F]">
+                                Accepted
+                            </p>
+                            <p className="mt-1 font-serif text-2xl font-semibold text-[#1B4332]">
+                                {acceptedCount}
+                            </p>
+                        </div>
+
+                        <div className="rounded-2xl bg-[#FCEFE3] p-4">
+                            <p className="text-xs text-[#B44822]">
+                                Rejected
+                            </p>
+                            <p className="mt-1 font-serif text-2xl font-semibold text-[#B44822]">
+                                {rejectedCount}
+                            </p>
+                        </div>
+                    </section>
+                )}
+
                 {/* NO OFFERS */}
+
                 {offers.length ===
                     0 && (
                     <div className="rounded-3xl border border-dashed border-[#E4DCC8] bg-white p-12 text-center">
-                        <Package className="mx-auto h-12 w-12 text-[#B9C9BB]" />
+                        <PackageCheck className="mx-auto h-12 w-12 text-[#B9C9BB]" />
 
                         <h2 className="mt-4 font-serif text-2xl font-semibold text-[#1B4332]">
                             No offers yet
@@ -357,10 +503,19 @@ export default function FarmerOffers() {
                         <p className="mt-2 text-sm text-[#8A8370]">
                             When vendors make offers on your crops, they will appear here.
                         </p>
+
+                        <Link
+                            href="/dashboard"
+                            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#1B4332] px-5 py-3 text-sm font-semibold text-white"
+                        >
+                            <ArrowLeft className="h-4 w-4" />
+                            Back to Dashboard
+                        </Link>
                     </div>
                 )}
 
                 {/* OFFERS */}
+
                 <div className="space-y-5">
                     {offers.map(
                         (offer) => (
@@ -371,6 +526,7 @@ export default function FarmerOffers() {
                                 className="rounded-3xl border border-[#E4DCC8] bg-white p-5 shadow-sm sm:p-6"
                             >
                                 {/* OFFER HEADER */}
+
                                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                                     <div className="flex items-center gap-3">
                                         <div className="grid h-12 w-12 place-items-center rounded-xl bg-[#EAF1EC] text-[#1B4332]">
@@ -397,7 +553,8 @@ export default function FarmerOffers() {
                                     />
                                 </div>
 
-                                {/* OFFER DETAILS */}
+                                {/* DETAILS */}
+
                                 <div className="mt-5 grid gap-3 sm:grid-cols-3">
                                     <div className="rounded-2xl bg-[#FBF7EF] p-4">
                                         <p className="text-xs text-[#8A8370]">
@@ -433,16 +590,19 @@ export default function FarmerOffers() {
 
                                         <p className="mt-1 flex items-center font-semibold text-[#C4622D]">
                                             <IndianRupee className="h-4 w-4" />
-
                                             {
                                                 offer.offeredPricePerUnit
                                             }
-                                            /kg
+                                            /
+                                            {
+                                                offer.unit
+                                            }
                                         </p>
                                     </div>
                                 </div>
 
-                                {/* PRICE COMPARISON */}
+                                {/* PRICE */}
+
                                 <div className="mt-4 flex flex-col gap-2 rounded-2xl border border-[#E4DCC8] p-4 sm:flex-row sm:items-center sm:justify-between">
                                     <div>
                                         <p className="text-xs text-[#8A8370]">
@@ -454,7 +614,10 @@ export default function FarmerOffers() {
                                             {
                                                 offer.originalPricePerUnit
                                             }
-                                            /kg
+                                            /
+                                            {
+                                                offer.unit
+                                            }
                                         </p>
                                     </div>
 
@@ -475,7 +638,8 @@ export default function FarmerOffers() {
                                     </div>
                                 </div>
 
-                                {/* ACTION BUTTONS */}
+                                {/* ACCEPT / REJECT */}
+
                                 {offer.status ===
                                     "pending" && (
                                     <div className="mt-5 flex gap-3">
@@ -485,10 +649,9 @@ export default function FarmerOffers() {
                                                     offer
                                                 )
                                             }
-                                            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#1B4332] py-3 text-sm font-semibold text-white"
+                                            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#1B4332] py-3 text-sm font-semibold text-white transition hover:bg-[#14372A]"
                                         >
                                             <Check className="h-4 w-4" />
-
                                             Accept
                                         </button>
 
@@ -498,30 +661,46 @@ export default function FarmerOffers() {
                                                     offer
                                                 )
                                             }
-                                            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#FCEFE3] py-3 text-sm font-semibold text-[#C4622D]"
+                                            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#FCEFE3] py-3 text-sm font-semibold text-[#C4622D] transition hover:bg-[#F8E1D1]"
                                         >
                                             <X className="h-4 w-4" />
-
                                             Reject
                                         </button>
                                     </div>
                                 )}
 
                                 {/* DEAL PROGRESS */}
+
                                 {offer.status ===
                                     "accepted" && (
                                     <DealProgress
                                         offer={
                                             offer
                                         }
+                                        onUpdated={
+                                            loadOffers
+                                        }
                                     />
                                 )}
+
+                                {/* REJECTED */}
 
                                 {offer.status ===
                                     "rejected" && (
                                     <div className="mt-5 rounded-2xl bg-[#FCEFE3] p-4 text-center">
                                         <p className="text-sm font-semibold text-[#B44822]">
                                             This offer has been rejected.
+                                        </p>
+                                    </div>
+                                )}
+
+                                {/* CANCELLED */}
+
+                                {offer.status ===
+                                    "cancelled" && (
+                                    <div className="mt-5 rounded-2xl bg-[#F1F1F1] p-4 text-center">
+                                        <p className="text-sm font-semibold text-[#666666]">
+                                            This offer was cancelled by the vendor.
                                         </p>
                                     </div>
                                 )}
