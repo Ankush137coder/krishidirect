@@ -3,8 +3,7 @@
 export type OfferStatus =
     | "pending"
     | "accepted"
-    | "rejected"
-    | "cancelled";
+    | "rejected";
 
 export type DealStage =
     | "offer-received"
@@ -41,10 +40,6 @@ export interface MarketplaceOffer {
 const STORAGE_KEY =
     "krishidirect-marketplace-offers";
 
-/* -------------------------------------------------- */
-/* Get all offers */
-/* -------------------------------------------------- */
-
 export function getOffers(): MarketplaceOffer[] {
     if (typeof window === "undefined") {
         return [];
@@ -68,10 +63,6 @@ export function getOffers(): MarketplaceOffer[] {
     }
 }
 
-/* -------------------------------------------------- */
-/* Save new offer */
-/* -------------------------------------------------- */
-
 export function saveOffer(
     offer: MarketplaceOffer
 ) {
@@ -94,10 +85,6 @@ export function saveOffer(
         )
     );
 }
-
-/* -------------------------------------------------- */
-/* Update an offer */
-/* -------------------------------------------------- */
 
 export function updateOffer(
     id: string,
@@ -133,10 +120,7 @@ export function updateOffer(
     );
 }
 
-/* -------------------------------------------------- */
-/* Cancel an offer */
-/* -------------------------------------------------- */
-
+/* Cancel / remove an offer */
 export function cancelOffer(
     id: string
 ) {
@@ -147,14 +131,9 @@ export function cancelOffer(
     const offers = getOffers();
 
     const updatedOffers =
-        offers.map((offer) =>
-            offer.id === id &&
-            offer.status === "pending"
-                ? {
-                      ...offer,
-                      status: "cancelled" as const,
-                  }
-                : offer
+        offers.filter(
+            (offer) =>
+                offer.id !== id
         );
 
     localStorage.setItem(
@@ -170,10 +149,6 @@ export function cancelOffer(
         )
     );
 }
-
-/* -------------------------------------------------- */
-/* Clear all offers - useful for demo/testing */
-/* -------------------------------------------------- */
 
 export function clearOffers() {
     if (typeof window === "undefined") {
