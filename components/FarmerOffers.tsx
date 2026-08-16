@@ -7,6 +7,7 @@ import {
     X,
     Clock,
     Truck,
+    Package,
     PackageCheck,
     CircleCheck,
     User,
