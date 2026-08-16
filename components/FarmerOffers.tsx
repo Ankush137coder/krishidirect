@@ -1,31 +1,36 @@
 // components/FarmerOffers.tsx
+
 "use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+
 import {
-    ArrowLeft,
     Check,
     X,
     Clock,
     Truck,
+    Package,
     PackageCheck,
     CircleCheck,
     User,
     IndianRupee,
-    Inbox,
+    ArrowLeft,
+    Ban,
 } from "lucide-react";
 
 import {
     getOffers,
     updateOffer,
+    cancelOffer,
     type MarketplaceOffer,
     type DealStage,
 } from "@/lib/marketplaceOffers";
 
-/* -------------------------------------------------- */
-/* Deal stages */
-/* -------------------------------------------------- */
+
+/* =========================================================
+   DEAL STAGES
+========================================================= */
 
 const DEAL_STAGES: {
     id: DealStage;
@@ -58,9 +63,10 @@ const DEAL_STAGES: {
     },
 ];
 
-/* -------------------------------------------------- */
-/* Stage index */
-/* -------------------------------------------------- */
+
+/* =========================================================
+   GET CURRENT DEAL STAGE INDEX
+========================================================= */
 
 function getStageIndex(
     stage: DealStage
@@ -71,9 +77,10 @@ function getStageIndex(
     );
 }
 
-/* -------------------------------------------------- */
-/* Status badge */
-/* -------------------------------------------------- */
+
+/* =========================================================
+   STATUS BADGE
+========================================================= */
 
 function StatusBadge({
     status,
@@ -82,8 +89,8 @@ function StatusBadge({
 }) {
     if (status === "pending") {
         return (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FFF4D6] px-3 py-1.5 text-xs font-semibold text-[#9A6B00]">
-                <span className="h-2 w-2 rounded-full bg-[#E8A33D]" />
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#FFF4D6] px-3 py-1 text-xs font-semibold text-[#9A6B00]">
+                <Clock className="h-3.5 w-3.5" />
                 Pending
             </span>
         );
@@ -91,70 +98,39 @@ function StatusBadge({
 
     if (status === "accepted") {
         return (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#EAF1EC] px-3 py-1.5 text-xs font-semibold text-[#1B4332]">
-                <span className="h-2 w-2 rounded-full bg-[#2D6A4F]" />
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#EAF1EC] px-3 py-1 text-xs font-semibold text-[#1B4332]">
+                <Check className="h-3.5 w-3.5" />
                 Accepted
             </span>
         );
     }
 
-    if (status === "rejected") {
-        return (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FCEFE3] px-3 py-1.5 text-xs font-semibold text-[#B44822]">
-                <span className="h-2 w-2 rounded-full bg-[#C4622D]" />
-                Rejected
-            </span>
-        );
-    }
-
     return (
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#F1F1F1] px-3 py-1.5 text-xs font-semibold text-[#666666]">
-            <span className="h-2 w-2 rounded-full bg-[#888888]" />
-            Cancelled
+        <span className="inline-flex items-center gap-1 rounded-full bg-[#FCEFE3] px-3 py-1 text-xs font-semibold text-[#B44822]">
+            <X className="h-3.5 w-3.5" />
+            Rejected
         </span>
     );
 }
 
-/* -------------------------------------------------- */
-/* Deal progress */
-/* -------------------------------------------------- */
+
+/* =========================================================
+   DEAL PROGRESS
+========================================================= */
 
 function DealProgress({
     offer,
-    onUpdated,
 }: {
     offer: MarketplaceOffer;
-    onUpdated: () => void;
 }) {
     const currentIndex =
         getStageIndex(
             offer.dealStage
         );
 
-    const advanceDeal = () => {
-        const nextStage =
-            currentIndex + 1;
-
-        if (
-            nextStage <
-            DEAL_STAGES.length
-        ) {
-            updateOffer(
-                offer.id,
-                {
-                    dealStage:
-                        DEAL_STAGES[
-                            nextStage
-                        ].id,
-                }
-            );
-
-            onUpdated();
-        }
-    };
-
     return (
         <div className="mt-6 rounded-2xl bg-[#FBF7EF] p-5">
+
             <div className="mb-5">
                 <p className="text-xs font-semibold uppercase tracking-wider text-[#8A8370]">
                     Deal Status
@@ -165,12 +141,15 @@ function DealProgress({
                 </h3>
             </div>
 
+
             <div className="space-y-4">
+
                 {DEAL_STAGES.map(
                     (
                         stage,
                         index
                     ) => {
+
                         const completed =
                             index <=
                             currentIndex;
@@ -186,7 +165,9 @@ function DealProgress({
                                 }
                                 className="flex items-start gap-3"
                             >
+
                                 <div className="flex flex-col items-center">
+
                                     <div
                                         className={`grid h-9 w-9 place-items-center rounded-full ${
                                             completed
@@ -194,9 +175,10 @@ function DealProgress({
                                                 : "bg-[#E4DCC8] text-[#8A8370]"
                                         }`}
                                     >
+
                                         {index ===
                                             0 && (
-                                            <Inbox className="h-4 w-4" />
+                                            <Clock className="h-4 w-4" />
                                         )}
 
                                         {index ===
@@ -213,7 +195,9 @@ function DealProgress({
                                             3 && (
                                             <CircleCheck className="h-4 w-4" />
                                         )}
+
                                     </div>
+
 
                                     {index <
                                         DEAL_STAGES.length -
@@ -227,9 +211,12 @@ function DealProgress({
                                             }`}
                                         />
                                     )}
+
                                 </div>
 
+
                                 <div className="pt-1">
+
                                     <p
                                         className={`text-sm font-semibold ${
                                             completed
@@ -237,6 +224,7 @@ function DealProgress({
                                                 : "text-[#8A8370]"
                                         }`}
                                     >
+
                                         {
                                             stage.label
                                         }
@@ -246,30 +234,59 @@ function DealProgress({
                                                 Current
                                             </span>
                                         )}
+
                                     </p>
+
 
                                     <p className="mt-0.5 text-xs text-[#8A8370]">
                                         {
                                             stage.description
                                         }
                                     </p>
+
                                 </div>
+
                             </div>
                         );
                     }
                 )}
+
             </div>
 
-            {/* Advance deal */}
 
-            {offer.dealStage !==
-                "completed" && (
+            {/* ADVANCE DEAL */}
+
+            {offer.status ===
+                "accepted" &&
+                offer.dealStage !==
+                    "completed" && (
+
                 <button
-                    onClick={
-                        advanceDeal
-                    }
-                    className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#1B4332] py-3 text-sm font-semibold text-white transition hover:bg-[#14372A]"
+                    onClick={() => {
+
+                        const nextStage =
+                            currentIndex +
+                            1;
+
+                        if (
+                            nextStage <
+                            DEAL_STAGES.length
+                        ) {
+                            updateOffer(
+                                offer.id,
+                                {
+                                    dealStage:
+                                        DEAL_STAGES[
+                                            nextStage
+                                        ].id,
+                                }
+                            );
+                        }
+
+                    }}
+                    className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#1B4332] py-3 text-sm font-semibold text-white transition hover:bg-[#143728]"
                 >
+
                     {offer.dealStage ===
                         "offer-accepted" && (
                         <>
@@ -278,6 +295,7 @@ function DealProgress({
                         </>
                     )}
 
+
                     {offer.dealStage ===
                         "pickup-arranged" && (
                         <>
@@ -285,28 +303,28 @@ function DealProgress({
                             Mark as Completed
                         </>
                     )}
+
                 </button>
             )}
 
-            {offer.dealStage ===
-                "completed" && (
-                <div className="mt-5 rounded-xl bg-[#EAF1EC] p-3 text-center text-sm font-semibold text-[#1B4332]">
-                    ✓ Deal completed successfully
-                </div>
-            )}
         </div>
     );
 }
 
-/* -------------------------------------------------- */
-/* Main component */
-/* -------------------------------------------------- */
+
+/* =========================================================
+   FARMER OFFERS PAGE
+========================================================= */
 
 export default function FarmerOffers() {
+
     const [offers, setOffers] =
         useState<
             MarketplaceOffer[]
         >([]);
+
+
+    /* Load offers */
 
     const loadOffers = () => {
         setOffers(
@@ -314,7 +332,11 @@ export default function FarmerOffers() {
         );
     };
 
+
+    /* Listen for offer updates */
+
     useEffect(() => {
+
         loadOffers();
 
         const handler = () =>
@@ -326,24 +348,31 @@ export default function FarmerOffers() {
         );
 
         return () => {
+
             window.removeEventListener(
                 "krishidirect-offers-updated",
                 handler
             );
+
         };
+
     }, []);
 
-    /* -------------------------------------------------- */
-    /* Accept */
-    /* -------------------------------------------------- */
+
+    /* =====================================================
+       ACCEPT
+    ===================================================== */
 
     const handleAccept = (
         offer: MarketplaceOffer
     ) => {
+
         updateOffer(
             offer.id,
             {
-                status: "accepted",
+                status:
+                    "accepted",
+
                 dealStage:
                     "offer-accepted",
             }
@@ -352,71 +381,96 @@ export default function FarmerOffers() {
         loadOffers();
     };
 
-    /* -------------------------------------------------- */
-    /* Reject */
-    /* -------------------------------------------------- */
+
+    /* =====================================================
+       REJECT
+    ===================================================== */
 
     const handleReject = (
         offer: MarketplaceOffer
     ) => {
+
         updateOffer(
             offer.id,
             {
-                status: "rejected",
+                status:
+                    "rejected",
             }
         );
 
         loadOffers();
     };
 
-    /* -------------------------------------------------- */
-    /* Counts */
-    /* -------------------------------------------------- */
 
-    const pendingCount =
-        offers.filter(
-            (o) =>
-                o.status ===
-                "pending"
-        ).length;
+    /* =====================================================
+       CANCEL
+    ===================================================== */
 
-    const acceptedCount =
-        offers.filter(
-            (o) =>
-                o.status ===
-                "accepted"
-        ).length;
+    const handleCancel = (
+        offer: MarketplaceOffer
+    ) => {
 
-    const rejectedCount =
-        offers.filter(
-            (o) =>
-                o.status ===
-                "rejected"
-        ).length;
+        const confirmed =
+            window.confirm(
+                "Are you sure you want to cancel this offer?"
+            );
+
+        if (!confirmed) {
+            return;
+        }
+
+        cancelOffer(
+            offer.id
+        );
+
+        loadOffers();
+    };
+
 
     return (
+
         <main className="min-h-screen bg-[#FBF7EF] px-4 py-6 sm:px-6">
+
             <div className="mx-auto max-w-5xl">
 
-                {/* BACK BUTTON */}
 
-                <Link
-                    href="/dashboard"
-                    className="mb-5 inline-flex items-center gap-2 rounded-xl border border-[#E4DCC8] bg-white px-4 py-2.5 text-sm font-semibold text-[#1B4332] shadow-sm transition hover:border-[#1B4332]"
-                >
-                    <ArrowLeft className="h-4 w-4" />
-                    Back to Dashboard
-                </Link>
+                {/* =================================================
+                    BACK TO DASHBOARD
+                ================================================= */}
 
-                {/* HEADER */}
+                <div className="mb-4">
+
+                    <Link
+                        href="/dashboard"
+                        className="inline-flex items-center gap-2 rounded-xl border border-[#E4DCC8] bg-white px-4 py-2.5 text-sm font-semibold text-[#1B4332] shadow-sm transition hover:bg-[#EAF1EC]"
+                    >
+
+                        <ArrowLeft className="h-4 w-4" />
+
+                        Back to Dashboard
+
+                    </Link>
+
+                </div>
+
+
+                {/* =================================================
+                    HEADER
+                ================================================= */}
 
                 <section className="mb-6 rounded-3xl bg-[#1B4332] p-6 text-[#FBF7EF] shadow-lg sm:p-8">
+
                     <div className="flex items-center gap-4">
+
                         <div className="grid h-12 w-12 place-items-center rounded-2xl bg-[#E8A33D] text-[#1B4332]">
+
                             <PackageCheck className="h-6 w-6" />
+
                         </div>
 
+
                         <div>
+
                             <p className="text-xs uppercase tracking-wider text-[#B9C9BB]">
                                 KrishiDirect
                             </p>
@@ -428,73 +482,24 @@ export default function FarmerOffers() {
                             <p className="mt-1 text-sm text-[#D8E5DC]">
                                 Review vendor offers and manage your deals.
                             </p>
+
                         </div>
+
                     </div>
+
                 </section>
 
-                {/* STATUS LEGEND */}
 
-                <section className="mb-6 rounded-2xl border border-[#E4DCC8] bg-white p-4">
-                    <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#8A8370]">
-                        Offer Status
-                    </p>
-
-                    <div className="flex flex-wrap gap-3">
-                        <StatusBadge status="pending" />
-                        <StatusBadge status="accepted" />
-                        <StatusBadge status="rejected" />
-                        <StatusBadge status="cancelled" />
-                    </div>
-                </section>
-
-                {/* SUMMARY */}
-
-                {offers.length > 0 && (
-                    <section className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                        <div className="rounded-2xl bg-white p-4 shadow-sm">
-                            <p className="text-xs text-[#8A8370]">
-                                Total Offers
-                            </p>
-                            <p className="mt-1 font-serif text-2xl font-semibold text-[#1B4332]">
-                                {offers.length}
-                            </p>
-                        </div>
-
-                        <div className="rounded-2xl bg-[#FFF4D6] p-4">
-                            <p className="text-xs text-[#9A6B00]">
-                                Pending
-                            </p>
-                            <p className="mt-1 font-serif text-2xl font-semibold text-[#9A6B00]">
-                                {pendingCount}
-                            </p>
-                        </div>
-
-                        <div className="rounded-2xl bg-[#EAF1EC] p-4">
-                            <p className="text-xs text-[#2D6A4F]">
-                                Accepted
-                            </p>
-                            <p className="mt-1 font-serif text-2xl font-semibold text-[#1B4332]">
-                                {acceptedCount}
-                            </p>
-                        </div>
-
-                        <div className="rounded-2xl bg-[#FCEFE3] p-4">
-                            <p className="text-xs text-[#B44822]">
-                                Rejected
-                            </p>
-                            <p className="mt-1 font-serif text-2xl font-semibold text-[#B44822]">
-                                {rejectedCount}
-                            </p>
-                        </div>
-                    </section>
-                )}
-
-                {/* NO OFFERS */}
+                {/* =================================================
+                    NO OFFERS
+                ================================================= */}
 
                 {offers.length ===
                     0 && (
+
                     <div className="rounded-3xl border border-dashed border-[#E4DCC8] bg-white p-12 text-center">
-                        <PackageCheck className="mx-auto h-12 w-12 text-[#B9C9BB]" />
+
+                        <Package className="mx-auto h-12 w-12 text-[#B9C9BB]" />
 
                         <h2 className="mt-4 font-serif text-2xl font-semibold text-[#1B4332]">
                             No offers yet
@@ -506,34 +511,49 @@ export default function FarmerOffers() {
 
                         <Link
                             href="/dashboard"
-                            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#1B4332] px-5 py-3 text-sm font-semibold text-white"
+                            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#1B4332] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#143728]"
                         >
                             <ArrowLeft className="h-4 w-4" />
-                            Back to Dashboard
+                            Return to Dashboard
                         </Link>
+
                     </div>
+
                 )}
 
-                {/* OFFERS */}
+
+                {/* =================================================
+                    OFFERS
+                ================================================= */}
 
                 <div className="space-y-5">
+
                     {offers.map(
                         (offer) => (
+
                             <section
                                 key={
                                     offer.id
                                 }
                                 className="rounded-3xl border border-[#E4DCC8] bg-white p-5 shadow-sm sm:p-6"
                             >
+
+
                                 {/* OFFER HEADER */}
 
                                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+
                                     <div className="flex items-center gap-3">
+
                                         <div className="grid h-12 w-12 place-items-center rounded-xl bg-[#EAF1EC] text-[#1B4332]">
+
                                             <User className="h-6 w-6" />
+
                                         </div>
 
+
                                         <div>
+
                                             <p className="font-semibold text-[#1B4332]">
                                                 {
                                                     offer.vendorName
@@ -543,20 +563,29 @@ export default function FarmerOffers() {
                                             <p className="text-xs text-[#8A8370]">
                                                 Vendor offer
                                             </p>
+
                                         </div>
+
                                     </div>
+
 
                                     <StatusBadge
                                         status={
                                             offer.status
                                         }
                                     />
+
                                 </div>
 
-                                {/* DETAILS */}
+
+                                {/* =================================================
+                                    OFFER DETAILS
+                                ================================================= */}
 
                                 <div className="mt-5 grid gap-3 sm:grid-cols-3">
+
                                     <div className="rounded-2xl bg-[#FBF7EF] p-4">
+
                                         <p className="text-xs text-[#8A8370]">
                                             Crop
                                         </p>
@@ -566,9 +595,12 @@ export default function FarmerOffers() {
                                                 offer.crop
                                             }
                                         </p>
+
                                     </div>
 
+
                                     <div className="rounded-2xl bg-[#FBF7EF] p-4">
+
                                         <p className="text-xs text-[#8A8370]">
                                             Quantity
                                         </p>
@@ -581,30 +613,41 @@ export default function FarmerOffers() {
                                                 offer.unit
                                             }
                                         </p>
+
                                     </div>
 
+
                                     <div className="rounded-2xl bg-[#FCEFE3] p-4">
+
                                         <p className="text-xs text-[#8A8370]">
                                             Offered Price
                                         </p>
 
                                         <p className="mt-1 flex items-center font-semibold text-[#C4622D]">
+
                                             <IndianRupee className="h-4 w-4" />
+
                                             {
                                                 offer.offeredPricePerUnit
                                             }
-                                            /
-                                            {
-                                                offer.unit
-                                            }
+
+                                            /kg
+
                                         </p>
+
                                     </div>
+
                                 </div>
 
-                                {/* PRICE */}
+
+                                {/* =================================================
+                                    PRICE COMPARISON
+                                ================================================= */}
 
                                 <div className="mt-4 flex flex-col gap-2 rounded-2xl border border-[#E4DCC8] p-4 sm:flex-row sm:items-center sm:justify-between">
+
                                     <div>
+
                                         <p className="text-xs text-[#8A8370]">
                                             Your listed price
                                         </p>
@@ -614,14 +657,14 @@ export default function FarmerOffers() {
                                             {
                                                 offer.originalPricePerUnit
                                             }
-                                            /
-                                            {
-                                                offer.unit
-                                            }
+                                            /kg
                                         </p>
+
                                     </div>
 
+
                                     <div>
+
                                         <p className="text-xs text-[#8A8370]">
                                             Total offer value
                                         </p>
@@ -635,25 +678,40 @@ export default function FarmerOffers() {
                                                 "en-IN"
                                             )}
                                         </p>
+
                                     </div>
+
                                 </div>
 
-                                {/* ACCEPT / REJECT */}
+
+                                {/* =================================================
+                                    ACTION BUTTONS
+                                ================================================= */}
 
                                 {offer.status ===
                                     "pending" && (
-                                    <div className="mt-5 flex gap-3">
+
+                                    <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+
+                                        {/* ACCEPT */}
+
                                         <button
                                             onClick={() =>
                                                 handleAccept(
                                                     offer
                                                 )
                                             }
-                                            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#1B4332] py-3 text-sm font-semibold text-white transition hover:bg-[#14372A]"
+                                            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#1B4332] py-3 text-sm font-semibold text-white transition hover:bg-[#143728]"
                                         >
+
                                             <Check className="h-4 w-4" />
+
                                             Accept
+
                                         </button>
+
+
+                                        {/* REJECT */}
 
                                         <button
                                             onClick={() =>
@@ -661,54 +719,80 @@ export default function FarmerOffers() {
                                                     offer
                                                 )
                                             }
-                                            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#FCEFE3] py-3 text-sm font-semibold text-[#C4622D] transition hover:bg-[#F8E1D1]"
+                                            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#FCEFE3] py-3 text-sm font-semibold text-[#C4622D] transition hover:bg-[#F8DFCE]"
                                         >
+
                                             <X className="h-4 w-4" />
+
                                             Reject
+
                                         </button>
+
+
+                                        {/* CANCEL */}
+
+                                        <button
+                                            onClick={() =>
+                                                handleCancel(
+                                                    offer
+                                                )
+                                            }
+                                            className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#E4DCC8] bg-white py-3 text-sm font-semibold text-[#8A8370] transition hover:border-[#C4622D] hover:bg-[#FCEFE3] hover:text-[#C4622D]"
+                                        >
+
+                                            <Ban className="h-4 w-4" />
+
+                                            Cancel Offer
+
+                                        </button>
+
                                     </div>
+
                                 )}
 
-                                {/* DEAL PROGRESS */}
+
+                                {/* =================================================
+                                    DEAL PROGRESS
+                                ================================================= */}
 
                                 {offer.status ===
                                     "accepted" && (
+
                                     <DealProgress
                                         offer={
                                             offer
                                         }
-                                        onUpdated={
-                                            loadOffers
-                                        }
                                     />
+
                                 )}
 
-                                {/* REJECTED */}
+
+                                {/* =================================================
+                                    REJECTED
+                                ================================================= */}
 
                                 {offer.status ===
                                     "rejected" && (
+
                                     <div className="mt-5 rounded-2xl bg-[#FCEFE3] p-4 text-center">
+
                                         <p className="text-sm font-semibold text-[#B44822]">
                                             This offer has been rejected.
                                         </p>
+
                                     </div>
+
                                 )}
 
-                                {/* CANCELLED */}
-
-                                {offer.status ===
-                                    "cancelled" && (
-                                    <div className="mt-5 rounded-2xl bg-[#F1F1F1] p-4 text-center">
-                                        <p className="text-sm font-semibold text-[#666666]">
-                                            This offer was cancelled by the vendor.
-                                        </p>
-                                    </div>
-                                )}
                             </section>
+
                         )
                     )}
+
                 </div>
+
             </div>
+
         </main>
     );
 }
