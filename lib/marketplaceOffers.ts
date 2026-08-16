@@ -38,7 +38,12 @@ export interface MarketplaceOffer {
     createdAt: string;
 }
 
-const STORAGE_KEY = "krishidirect-marketplace-offers";
+const STORAGE_KEY =
+    "krishidirect-marketplace-offers";
+
+/* -------------------------------------------------------
+   GET ALL OFFERS
+------------------------------------------------------- */
 
 export function getOffers(): MarketplaceOffer[] {
     if (typeof window === "undefined") {
@@ -46,19 +51,28 @@ export function getOffers(): MarketplaceOffer[] {
     }
 
     try {
-        const stored = localStorage.getItem(STORAGE_KEY);
+        const stored =
+            localStorage.getItem(STORAGE_KEY);
 
         if (!stored) {
             return [];
         }
 
-        return JSON.parse(stored) as MarketplaceOffer[];
+        return JSON.parse(
+            stored
+        ) as MarketplaceOffer[];
     } catch {
         return [];
     }
 }
 
-export function saveOffer(offer: MarketplaceOffer) {
+/* -------------------------------------------------------
+   SAVE NEW OFFER
+------------------------------------------------------- */
+
+export function saveOffer(
+    offer: MarketplaceOffer
+): void {
     if (typeof window === "undefined") {
         return;
     }
@@ -73,28 +87,35 @@ export function saveOffer(offer: MarketplaceOffer) {
     );
 
     window.dispatchEvent(
-        new Event("krishidirect-offers-updated")
+        new Event(
+            "krishidirect-offers-updated"
+        )
     );
 }
+
+/* -------------------------------------------------------
+   UPDATE OFFER
+------------------------------------------------------- */
 
 export function updateOffer(
     id: string,
     updates: Partial<MarketplaceOffer>
-) {
+): void {
     if (typeof window === "undefined") {
         return;
     }
 
     const offers = getOffers();
 
-    const updatedOffers = offers.map((offer) =>
-        offer.id === id
-            ? {
-                  ...offer,
-                  ...updates,
-              }
-            : offer
-    );
+    const updatedOffers =
+        offers.map((offer) =>
+            offer.id === id
+                ? {
+                      ...offer,
+                      ...updates,
+                  }
+                : offer
+        );
 
     localStorage.setItem(
         STORAGE_KEY,
@@ -102,24 +123,34 @@ export function updateOffer(
     );
 
     window.dispatchEvent(
-        new Event("krishidirect-offers-updated")
+        new Event(
+            "krishidirect-offers-updated"
+        )
     );
 }
 
-/**
- * Permanently removes one offer.
- * Used by the vendor to cancel a pending offer.
- */
-export function deleteOffer(id: string) {
+/* -------------------------------------------------------
+   CANCEL OFFER
+------------------------------------------------------- */
+
+export function cancelOffer(
+    id: string
+): void {
     if (typeof window === "undefined") {
         return;
     }
 
     const offers = getOffers();
 
-    const updatedOffers = offers.filter(
-        (offer) => offer.id !== id
-    );
+    const updatedOffers =
+        offers.map((offer) =>
+            offer.id === id
+                ? {
+                      ...offer,
+                      status: "cancelled" as OfferStatus,
+                  }
+                : offer
+        );
 
     localStorage.setItem(
         STORAGE_KEY,
@@ -127,18 +158,59 @@ export function deleteOffer(id: string) {
     );
 
     window.dispatchEvent(
-        new Event("krishidirect-offers-updated")
+        new Event(
+            "krishidirect-offers-updated"
+        )
     );
 }
 
-export function clearOffers() {
+/* -------------------------------------------------------
+   DELETE OFFER
+------------------------------------------------------- */
+
+export function deleteOffer(
+    id: string
+): void {
     if (typeof window === "undefined") {
         return;
     }
 
-    localStorage.removeItem(STORAGE_KEY);
+    const offers = getOffers();
+
+    const updatedOffers =
+        offers.filter(
+            (offer) =>
+                offer.id !== id
+        );
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(updatedOffers)
+    );
 
     window.dispatchEvent(
-        new Event("krishidirect-offers-updated")
+        new Event(
+            "krishidirect-offers-updated"
+        )
+    );
+}
+
+/* -------------------------------------------------------
+   CLEAR ALL OFFERS
+------------------------------------------------------- */
+
+export function clearOffers(): void {
+    if (typeof window === "undefined") {
+        return;
+    }
+
+    localStorage.removeItem(
+        STORAGE_KEY
+    );
+
+    window.dispatchEvent(
+        new Event(
+            "krishidirect-offers-updated"
+        )
     );
 }
