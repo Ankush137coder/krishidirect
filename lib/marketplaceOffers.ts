@@ -3,7 +3,8 @@
 export type OfferStatus =
     | "pending"
     | "accepted"
-    | "rejected";
+    | "rejected"
+    | "cancelled";
 
 export type DealStage =
     | "offer-received"
@@ -37,8 +38,7 @@ export interface MarketplaceOffer {
     createdAt: string;
 }
 
-const STORAGE_KEY =
-    "krishidirect-marketplace-offers";
+const STORAGE_KEY = "krishidirect-marketplace-offers";
 
 export function getOffers(): MarketplaceOffer[] {
     if (typeof window === "undefined") {
@@ -46,26 +46,19 @@ export function getOffers(): MarketplaceOffer[] {
     }
 
     try {
-        const stored =
-            localStorage.getItem(
-                STORAGE_KEY
-            );
+        const stored = localStorage.getItem(STORAGE_KEY);
 
         if (!stored) {
             return [];
         }
 
-        return JSON.parse(
-            stored
-        ) as MarketplaceOffer[];
+        return JSON.parse(stored) as MarketplaceOffer[];
     } catch {
         return [];
     }
 }
 
-export function saveOffer(
-    offer: MarketplaceOffer
-) {
+export function saveOffer(offer: MarketplaceOffer) {
     if (typeof window === "undefined") {
         return;
     }
@@ -80,9 +73,7 @@ export function saveOffer(
     );
 
     window.dispatchEvent(
-        new Event(
-            "krishidirect-offers-updated"
-        )
+        new Event("krishidirect-offers-updated")
     );
 }
 
@@ -96,57 +87,47 @@ export function updateOffer(
 
     const offers = getOffers();
 
-    const updatedOffers =
-        offers.map((offer) =>
-            offer.id === id
-                ? {
-                      ...offer,
-                      ...updates,
-                  }
-                : offer
-        );
+    const updatedOffers = offers.map((offer) =>
+        offer.id === id
+            ? {
+                  ...offer,
+                  ...updates,
+              }
+            : offer
+    );
 
     localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify(
-            updatedOffers
-        )
+        JSON.stringify(updatedOffers)
     );
 
     window.dispatchEvent(
-        new Event(
-            "krishidirect-offers-updated"
-        )
+        new Event("krishidirect-offers-updated")
     );
 }
 
-/* Cancel / remove an offer */
-export function cancelOffer(
-    id: string
-) {
+/**
+ * Permanently removes one offer.
+ * Used by the vendor to cancel a pending offer.
+ */
+export function deleteOffer(id: string) {
     if (typeof window === "undefined") {
         return;
     }
 
     const offers = getOffers();
 
-    const updatedOffers =
-        offers.filter(
-            (offer) =>
-                offer.id !== id
-        );
+    const updatedOffers = offers.filter(
+        (offer) => offer.id !== id
+    );
 
     localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify(
-            updatedOffers
-        )
+        JSON.stringify(updatedOffers)
     );
 
     window.dispatchEvent(
-        new Event(
-            "krishidirect-offers-updated"
-        )
+        new Event("krishidirect-offers-updated")
     );
 }
 
@@ -155,13 +136,9 @@ export function clearOffers() {
         return;
     }
 
-    localStorage.removeItem(
-        STORAGE_KEY
-    );
+    localStorage.removeItem(STORAGE_KEY);
 
     window.dispatchEvent(
-        new Event(
-            "krishidirect-offers-updated"
-        )
+        new Event("krishidirect-offers-updated")
     );
 }
