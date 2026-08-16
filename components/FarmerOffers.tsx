@@ -1,4 +1,4 @@
-```tsx
+
 // components/FarmerOffers.tsx
 "use client";
 
@@ -640,4 +640,4 @@ export default function FarmerOffers() {
         </main>
     );
 }
-```
+
